@@ -25,7 +25,8 @@ The first project layer uses browser storage:
 
 - `DemoProject`: project name, optional client name, room, notes, preferred styles, design direction, render list.
 - `ProjectRender`: before/after images, style, mode, notes, provider/model, favorite flag, timestamp.
-- `ProjectStore`: storage boundary so Supabase can replace localStorage later without changing UI flow.
+- `ProjectStore`: Promise-based storage boundary so Supabase can replace localStorage later without changing UI flow.
+- Saved project render images are compressed for browser storage; durable cloud storage should replace data URLs when persistence moves server-side.
 
 ## Roadmap
 

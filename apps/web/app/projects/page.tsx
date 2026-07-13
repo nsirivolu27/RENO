@@ -3,7 +3,7 @@
 import { ROOMS, STYLES } from "@reno/core";
 import type { DemoProject } from "@reno/core";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { localProjectStore } from "../../lib/projectStore";
 
 export default function ProjectsPage() {
@@ -15,9 +15,13 @@ export default function ProjectsPage() {
   const [designDirection, setDesignDirection] = useState("");
   const [preferredStyles, setPreferredStyles] = useState<string[]>(["modern-minimal"]);
   const [error, setError] = useState("");
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    setProjects(localProjectStore.list());
+    localProjectStore
+      .list()
+      .then(setProjects)
+      .catch(() => setError("Could not load projects from this browser."));
   }, []);
 
   function toggleStyle(styleId: string) {
@@ -28,10 +32,10 @@ export default function ProjectsPage() {
     );
   }
 
-  function createProject() {
+  async function createProject() {
     setError("");
     try {
-      const project = localProjectStore.create({
+      const project = await localProjectStore.create({
         name,
         clientName,
         room,
@@ -39,7 +43,7 @@ export default function ProjectsPage() {
         designDirection,
         preferredStyles
       });
-      setProjects(localProjectStore.list());
+      setProjects(await localProjectStore.list());
       setName("");
       setClientName("");
       setNotes("");
@@ -48,6 +52,21 @@ export default function ProjectsPage() {
       window.location.href = `/studio?project=${encodeURIComponent(project.id)}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create project.");
+    }
+  }
+
+  async function importProject(file: File | undefined) {
+    if (!file) return;
+    setError("");
+    try {
+      const imported = JSON.parse(await file.text()) as DemoProject;
+      await localProjectStore.importProject(imported);
+      setProjects(await localProjectStore.list());
+      if (importInputRef.current) {
+        importInputRef.current.value = "";
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not import this project JSON.");
     }
   }
 
@@ -109,11 +128,19 @@ export default function ProjectsPage() {
             </div>
           </div>
           {error ? <p className="error">{error}</p> : null}
-          <button className="button primary" type="button" onClick={createProject}>Create and open Studio</button>
+          <button className="button primary" type="button" onClick={() => void createProject()}>Create and open Studio</button>
         </section>
 
         <section className="projectPanel">
           <h2>Saved Demos</h2>
+          <div className="importRow">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={(event) => void importProject(event.target.files?.[0])}
+            />
+          </div>
           {projects.length ? (
             <div className="projectList">
               {projects.map((project) => (

@@ -4,7 +4,7 @@ import { createProjectRender, ROOMS, STYLES } from "@reno/core";
 import type { DemoProject, GenerateMode, GenerateResult } from "@reno/core";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { localProjectStore } from "../../lib/projectStore";
+import { compressProjectImage, localProjectStore } from "../../lib/projectStore";
 
 type ProviderInfo = { id: string; name: string; model: string; configured: boolean };
 const API_KEY_STORAGE_KEY = "reno_key";
@@ -40,12 +40,16 @@ export default function StudioPage() {
   useEffect(() => {
     setApiKey(localStorage.getItem(API_KEY_STORAGE_KEY) ?? "");
     setProvider(localStorage.getItem(PROVIDER_STORAGE_KEY) ?? "gemini");
-    const availableProjects = localProjectStore.list();
     const requestedProject = new URLSearchParams(window.location.search).get("project") ?? "";
-    setProjects(availableProjects);
-    if (availableProjects.some((project) => project.id === requestedProject)) {
-      setProjectId(requestedProject);
-    }
+    localProjectStore
+      .list()
+      .then((availableProjects) => {
+        setProjects(availableProjects);
+        if (availableProjects.some((project) => project.id === requestedProject)) {
+          setProjectId(requestedProject);
+        }
+      })
+      .catch(() => setError("Could not load demo projects from this browser."));
     fetch("/api/generate")
       .then((response) => response.json())
       .then((data: { credits: number; providers: ProviderInfo[] }) => {
@@ -129,17 +133,21 @@ export default function StudioPage() {
     }
   }
 
-  function saveToProject() {
+  async function saveToProject() {
     if (!activeProject || !result || !image) return;
     try {
+      const [beforeImage, afterImage] = await Promise.all([
+        compressProjectImage(image),
+        compressProjectImage(result.image)
+      ]);
       const render = createProjectRender({
         style,
         mode,
-        notes: notesForRequest(),
-        providerResult: result,
-        beforeImage: image
+        notes: notes.trim(),
+        providerResult: { ...result, image: afterImage },
+        beforeImage
       });
-      const updated = localProjectStore.addRender(activeProject.id, render);
+      const updated = await localProjectStore.addRender(activeProject.id, render);
       setProjects((current) =>
         current.map((project) => (project.id === updated.id ? updated : project))
       );
@@ -257,7 +265,7 @@ export default function StudioPage() {
               {loading ? "Generating..." : result ? "Regenerate" : "Generate"}
             </button>
             {result && activeProject ? (
-              <button className="button" type="button" disabled={Boolean(savedRenderId)} onClick={saveToProject}>
+              <button className="button" type="button" disabled={Boolean(savedRenderId)} onClick={() => void saveToProject()}>
                 {savedRenderId ? "Saved to project" : "Save to project"}
               </button>
             ) : null}

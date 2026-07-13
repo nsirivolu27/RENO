@@ -445,6 +445,10 @@ textarea {
   gap: 12px;
 }
 
+.importRow input {
+  border-style: dashed;
+}
+
 .projectItem {
   display: flex;
   align-items: center;
@@ -534,14 +538,23 @@ textarea {
 }
 
 @media print {
+  @page {
+    margin: 0.6in;
+  }
+
   body {
     background: #fff;
+    color: #111;
+  }
+
+  a {
     color: #111;
   }
 
   .studioHeader,
   .demoActions,
   .slider,
+  .divider,
   .button {
     display: none;
   }
@@ -551,5 +564,49 @@ textarea {
   .renderCard {
     background: #fff;
     color: #111;
+  }
+
+  .projectsPage {
+    padding: 0;
+  }
+
+  .projectsHero {
+    padding: 0 0 18px;
+  }
+
+  .projectsHero h1 {
+    font-size: 32px;
+    line-height: 1.1;
+  }
+
+  .projectSummary,
+  .renderGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .projectSummary article,
+  .renderCard {
+    border-color: #d8d8d8;
+    break-inside: avoid;
+  }
+
+  .compareFrame {
+    min-height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+  .compareFrame > img:first-child {
+    display: none;
+  }
+
+  .afterImage {
+    clip-path: none !important;
+  }
+
+  .renderMeta p,
+  .renderNotes,
+  .projectSummary p,
+  .lede {
+    color: #333;
   }
 }

@@ -12,6 +12,7 @@ Thanks for helping build Reno.
 ## Guidelines
 
 - Keep the BYO-key and self-host path working without paid Reno services.
+- Use `docs/PRODUCT.md` as the canonical product definition before proposing new workflows.
 - Prefer small, focused pull requests.
 - Run `npm run typecheck` before opening a PR.
 - Do not commit API keys, generated renders, or local environment files.

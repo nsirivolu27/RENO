@@ -47,18 +47,32 @@ function RenderCard({ render, onFavorite }: { render: ProjectRender; onFavorite:
 
 export default function ProjectDetailClient({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<DemoProject | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    setProject(localProjectStore.get(projectId) ?? null);
+    localProjectStore
+      .get(projectId)
+      .then((foundProject) => setProject(foundProject ?? null))
+      .catch(() => setError("Could not load this project from browser storage."));
   }, [projectId]);
 
-  function toggleFavorite(renderId: string) {
-    setProject(localProjectStore.toggleFavorite(projectId, renderId));
+  async function toggleFavorite(renderId: string) {
+    setError("");
+    try {
+      setProject(await localProjectStore.toggleFavorite(projectId, renderId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not update favorite.");
+    }
   }
 
-  function removeProject() {
-    localProjectStore.remove(projectId);
-    window.location.href = "/projects";
+  async function removeProject() {
+    setError("");
+    try {
+      await localProjectStore.remove(projectId);
+      window.location.href = "/projects";
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete project.");
+    }
   }
 
   if (!project) {
@@ -93,9 +107,10 @@ export default function ProjectDetailClient({ projectId }: { projectId: string }
         </div>
         <div className="demoActions">
           <button className="button" type="button" onClick={() => downloadProject(project)}>Export JSON</button>
-          <button className="button dangerButton" type="button" onClick={removeProject}>Delete</button>
+          <button className="button dangerButton" type="button" onClick={() => void removeProject()}>Delete</button>
         </div>
       </section>
+      {error ? <p className="error">{error}</p> : null}
 
       <section className="projectSummary">
         <article>
@@ -115,7 +130,7 @@ export default function ProjectDetailClient({ projectId }: { projectId: string }
       <section className="renderGrid">
         {project.renders.length ? (
           project.renders.map((render) => (
-            <RenderCard key={render.id} render={render} onFavorite={() => toggleFavorite(render.id)} />
+            <RenderCard key={render.id} render={render} onFavorite={() => void toggleFavorite(render.id)} />
           ))
         ) : (
           <div className="emptyState">No saved concepts yet. Open Studio and save a render to this project.</div>
