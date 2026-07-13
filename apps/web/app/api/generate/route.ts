@@ -19,6 +19,23 @@ function isMode(value: unknown): value is GenerateMode {
   return value === "restyle" || value === "renovate";
 }
 
+function errorStatus(error: unknown): number {
+  if (!(error instanceof Error)) {
+    return 500;
+  }
+
+  if (
+    error.message.startsWith("Missing") ||
+    error.message.startsWith("Mode must") ||
+    error.message.startsWith("Expected") ||
+    error.message.startsWith("Unknown provider")
+  ) {
+    return 400;
+  }
+
+  return 500;
+}
+
 function validateBody(body: GenerateBody): GenerateRequest {
   if (!body.image || typeof body.image !== "string") {
     throw new Error("Missing image data URL.");
@@ -81,7 +98,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Generation failed." },
-      { status: 500 }
+      { status: errorStatus(error) }
     );
   }
 }
