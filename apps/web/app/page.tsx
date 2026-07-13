@@ -13,7 +13,10 @@ export default function HomePage() {
       <section className="hero">
         <nav className="nav">
           <strong className="logo">Re<span>no</span></strong>
-          <Link href="/studio">Studio</Link>
+          <div className="navLinks">
+            <Link href="/projects">Projects</Link>
+            <Link href="/studio">Studio</Link>
+          </div>
         </nav>
         <div className="heroGrid">
           <div>

@@ -1,9 +1,10 @@
 "use client";
 
-import { ROOMS, STYLES } from "@reno/core";
-import type { GenerateMode, GenerateResult } from "@reno/core";
+import { createProjectRender, ROOMS, STYLES } from "@reno/core";
+import type { DemoProject, GenerateMode, GenerateResult } from "@reno/core";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { localProjectStore } from "../../lib/projectStore";
 
 type ProviderInfo = { id: string; name: string; model: string; configured: boolean };
 const API_KEY_STORAGE_KEY = "reno_key";
@@ -29,6 +30,9 @@ export default function StudioPage() {
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
+  const [projects, setProjects] = useState<DemoProject[]>([]);
+  const [projectId, setProjectId] = useState("");
+  const [savedRenderId, setSavedRenderId] = useState("");
   const [slider, setSlider] = useState(50);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,6 +40,12 @@ export default function StudioPage() {
   useEffect(() => {
     setApiKey(localStorage.getItem(API_KEY_STORAGE_KEY) ?? "");
     setProvider(localStorage.getItem(PROVIDER_STORAGE_KEY) ?? "gemini");
+    const availableProjects = localProjectStore.list();
+    const requestedProject = new URLSearchParams(window.location.search).get("project") ?? "";
+    setProjects(availableProjects);
+    if (availableProjects.some((project) => project.id === requestedProject)) {
+      setProjectId(requestedProject);
+    }
     fetch("/api/generate")
       .then((response) => response.json())
       .then((data: { credits: number; providers: ProviderInfo[] }) => {
@@ -57,11 +67,33 @@ export default function StudioPage() {
     () => providers.find((entry) => entry.id === provider),
     [provider, providers]
   );
+  const activeProject = useMemo(
+    () => projects.find((project) => project.id === projectId),
+    [projects, projectId]
+  );
+
+  function selectProject(nextProjectId: string) {
+    setProjectId(nextProjectId);
+    setSavedRenderId("");
+    const url = nextProjectId ? `/studio?project=${encodeURIComponent(nextProjectId)}` : "/studio";
+    window.history.replaceState(null, "", url);
+  }
+
+  function notesForRequest(): string {
+    return [
+      notes.trim(),
+      activeProject?.notes ? `Project notes: ${activeProject.notes}` : "",
+      activeProject?.designDirection ? `Client design direction and materials: ${activeProject.designDirection}` : ""
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  }
 
   async function handleFile(file: File | undefined) {
     if (!file) return;
     setError("");
     setResult(null);
+    setSavedRenderId("");
     setImage(await fileToDataUrl(file));
   }
 
@@ -77,7 +109,7 @@ export default function StudioPage() {
           room,
           style,
           mode,
-          notes,
+          notes: notesForRequest(),
           provider,
           apiKey: apiKey.trim() || undefined
         })
@@ -89,6 +121,7 @@ export default function StudioPage() {
       setResult(data.result);
       setCredits(data.credits);
       setSlider(50);
+      setSavedRenderId("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Generation failed.");
     } finally {
@@ -96,11 +129,34 @@ export default function StudioPage() {
     }
   }
 
+  function saveToProject() {
+    if (!activeProject || !result || !image) return;
+    try {
+      const render = createProjectRender({
+        style,
+        mode,
+        notes: notesForRequest(),
+        providerResult: result,
+        beforeImage: image
+      });
+      const updated = localProjectStore.addRender(activeProject.id, render);
+      setProjects((current) =>
+        current.map((project) => (project.id === updated.id ? updated : project))
+      );
+      setSavedRenderId(render.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save render.");
+    }
+  }
+
   return (
     <main className="studio">
       <header className="studioHeader">
         <Link className="logo" href="/">Re<span>no</span></Link>
-        <span className="badge">{credits ?? "-"} credits remaining</span>
+        <div className="projectActions">
+          <Link href="/projects">Projects</Link>
+          <span className="badge">{credits ?? "-"} credits remaining</span>
+        </div>
       </header>
 
       <div className="workspace">
@@ -123,6 +179,22 @@ export default function StudioPage() {
               {ROOMS.map((entry) => <option key={entry}>{entry}</option>)}
             </select>
           </label>
+
+          <label className="field">
+            <span>Demo project</span>
+            <select value={projectId} onChange={(event) => selectProject(event.target.value)}>
+              <option value="">No project</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>{project.name}</option>
+              ))}
+            </select>
+          </label>
+          {activeProject ? (
+            <div className="projectContext">
+              <strong>{activeProject.clientName || activeProject.name}</strong>
+              <p>{activeProject.designDirection || "No custom design direction saved for this project."}</p>
+            </div>
+          ) : null}
 
           <div className="segmented" aria-label="Render mode">
             <button type="button" className={mode === "restyle" ? "active" : ""} onClick={() => setMode("restyle")}>Restyle</button>
@@ -158,7 +230,7 @@ export default function StudioPage() {
           <div className="styleGrid">
             {STYLES.map((preset) => (
               <button type="button" className={style === preset.id ? "styleTile active" : "styleTile"} key={preset.id} onClick={() => setStyle(preset.id)}>
-                {preset.name}
+                {preset.name}{activeProject?.preferredStyles.includes(preset.id) ? " *" : ""}
               </button>
             ))}
           </div>
@@ -184,6 +256,12 @@ export default function StudioPage() {
             <button className="button primary" disabled={!image || loading} type="button" onClick={() => void generate()}>
               {loading ? "Generating..." : result ? "Regenerate" : "Generate"}
             </button>
+            {result && activeProject ? (
+              <button className="button" type="button" disabled={Boolean(savedRenderId)} onClick={saveToProject}>
+                {savedRenderId ? "Saved to project" : "Save to project"}
+              </button>
+            ) : null}
+            {activeProject ? <Link className="button" href={`/projects/${activeProject.id}`}>Demo View</Link> : null}
             {result ? <a className="button" download="reno-render.png" href={result.image}>Download</a> : null}
           </div>
         </section>
