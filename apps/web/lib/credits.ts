@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { randomUUID } from "node:crypto";
 
-const COOKIE_NAME = "openreno_visitor";
+const COOKIE_NAME = "reno_visitor";
 const balances = new Map<string, number>();
 
 function freeCredits(): number {

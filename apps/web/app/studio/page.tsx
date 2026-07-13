@@ -1,11 +1,13 @@
 "use client";
 
-import { ROOMS, STYLES } from "@openreno/core";
-import type { GenerateMode, GenerateResult } from "@openreno/core";
+import { ROOMS, STYLES } from "@reno/core";
+import type { GenerateMode, GenerateResult } from "@reno/core";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type ProviderInfo = { id: string; name: string; model: string; configured: boolean };
+const API_KEY_STORAGE_KEY = "reno_key";
+const PROVIDER_STORAGE_KEY = "reno_provider";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -32,7 +34,8 @@ export default function StudioPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setApiKey(localStorage.getItem("openreno.apiKey") ?? "");
+    setApiKey(localStorage.getItem(API_KEY_STORAGE_KEY) ?? "");
+    setProvider(localStorage.getItem(PROVIDER_STORAGE_KEY) ?? "gemini");
     fetch("/api/generate")
       .then((response) => response.json())
       .then((data: { credits: number; providers: ProviderInfo[] }) => {
@@ -43,8 +46,12 @@ export default function StudioPage() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("openreno.apiKey", apiKey);
+    localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
   }, [apiKey]);
+
+  useEffect(() => {
+    localStorage.setItem(PROVIDER_STORAGE_KEY, provider);
+  }, [provider]);
 
   const selectedProvider = useMemo(
     () => providers.find((entry) => entry.id === provider),
@@ -92,7 +99,7 @@ export default function StudioPage() {
   return (
     <main className="studio">
       <header className="studioHeader">
-        <Link href="/">OpenReno</Link>
+        <Link className="logo" href="/">Re<span>no</span></Link>
         <span className="badge">{credits ?? "-"} credits remaining</span>
       </header>
 
@@ -177,7 +184,7 @@ export default function StudioPage() {
             <button className="button primary" disabled={!image || loading} type="button" onClick={() => void generate()}>
               {loading ? "Generating..." : result ? "Regenerate" : "Generate"}
             </button>
-            {result ? <a className="button" download="openreno-render.png" href={result.image}>Download</a> : null}
+            {result ? <a className="button" download="reno-render.png" href={result.image}>Download</a> : null}
           </div>
         </section>
       </div>

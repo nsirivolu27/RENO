@@ -57,6 +57,15 @@ textarea {
   font-weight: 700;
 }
 
+.logo {
+  color: var(--text);
+  font-weight: 900;
+}
+
+.logo span {
+  color: var(--accent);
+}
+
 .heroGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 560px);
