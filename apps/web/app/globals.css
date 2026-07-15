@@ -1000,3 +1000,54 @@ p {
     height: auto;
   }
 }
+
+/* ---------- Polish: swatches, shimmer, focus ---------- */
+
+.style-card .swatches {
+  display: flex;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+.style-card .swatches i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.canvas-placeholder.loading {
+  border-style: solid;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas-placeholder.loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 120, 73, 0.07) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.6s infinite;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.btn:focus-visible,
+.chip:focus-visible,
+.style-card:focus-visible,
+.seg button:focus-visible,
+.fav-btn:focus-visible,
+.dropzone:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

@@ -10,7 +10,9 @@ interface OpenAIImageResponse {
   error?: { message?: string };
 }
 
-function base64ToBytes(base64: string): Uint8Array {
+// Return type inferred so the Uint8Array is backed by a plain ArrayBuffer
+// (satisfies BlobPart under TS 5.7+ strict lib typings).
+function base64ToBytes(base64: string) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {

@@ -4,9 +4,16 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Reno",
+  title: { default: "Reno", template: "%s — Reno" },
   description:
     "AI renovation and design demo app. Upload a photo of any space, pick a style, and generate a photorealistic redesign.",
+  openGraph: {
+    title: "Reno",
+    description:
+      "Upload a photo of any space, pick a style, and generate a photorealistic redesign.",
+    siteName: "Reno",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

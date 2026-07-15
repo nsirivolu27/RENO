@@ -17,6 +17,20 @@ import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 import { compressProjectImage, localProjectStore } from "@/lib/projectStore";
 
 const KEY_STORAGE = "reno_key";
+
+/** Presentational palette hints per style (UI only — prompts live in core). */
+const STYLE_SWATCHES: Record<string, [string, string, string]> = {
+  "modern-minimal": ["#e8e6e1", "#8a8d93", "#b48a60"],
+  scandinavian: ["#f2efe9", "#d9c7a7", "#7e93a8"],
+  japandi: ["#e5dcc9", "#6b5138", "#3d3a35"],
+  industrial: ["#8c5a3c", "#3a3f47", "#c98a4b"],
+  "mid-century": ["#d9a441", "#b6592e", "#6b7436"],
+  bohemian: ["#a3543f", "#c98f4e", "#5c7a5a"],
+  coastal: ["#f5f2ea", "#3d5a80", "#98c1d9"],
+  luxury: ["#1f3d33", "#c9a227", "#e8e3da"],
+  farmhouse: ["#f0ead9", "#3b3b3b", "#a68a64"],
+  cyberpunk: ["#ff2ec4", "#22d3ee", "#0a0a12"],
+};
 const PROVIDER_STORAGE = "reno_provider";
 
 interface ProviderInfo {
@@ -393,6 +407,11 @@ function Studio() {
                     aria-pressed={styleId === s.id}
                   >
                     <strong>{s.name}</strong>
+                    <span className="swatches" aria-hidden="true">
+                      {(STYLE_SWATCHES[s.id] ?? []).map((c) => (
+                        <i key={c} style={{ background: c }} />
+                      ))}
+                    </span>
                     {preferred && <span className="pref">★ client preferred</span>}
                   </button>
                 );
@@ -463,7 +482,7 @@ function Studio() {
         {/* -------- Canvas -------- */}
         <div>
           {loading ? (
-            <div className="canvas-placeholder" aria-live="polite">
+            <div className="canvas-placeholder loading" aria-live="polite">
               <span>
                 <span className="spinner" aria-hidden="true" />
                 Rendering your {room} in {activeStyle?.name ?? styleId}…
