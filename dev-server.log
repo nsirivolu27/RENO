@@ -1,0 +1,33 @@
+
+> reno@0.1.0 dev
+> npm run dev -w @reno/web
+
+
+> @reno/web@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3000
+   - Network:      http://172.22.240.1:3000
+   - Experiments (use with caution):
+     · serverActions
+
+ ✓ Starting...
+ ✓ Ready in 3s
+ ○ Compiling /projects ...
+ ✓ Compiled /projects in 12.4s (604 modules)
+ GET /studio 200 in 13563ms
+ GET /projects 200 in 13579ms
+ GET /projects 200 in 147ms
+ GET /studio 200 in 250ms
+ ○ Compiling /api/generate ...
+ ✓ Compiled /api/generate in 752ms (639 modules)
+ GET /api/generate 200 in 1151ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1368ms (606 modules)
+ GET / 200 in 2014ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.8s (611 modules)
+ GET / 404 in 4404ms
+   ▲ Next.js 15.5.20
+   - Local

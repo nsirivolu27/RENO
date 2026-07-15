@@ -1,104 +1,144 @@
-import { buildPrompt, dataUrlParts } from "@reno/core";
-import type { GenerateMode, GenerateRequest } from "@reno/core";
-import { getProvider, providers } from "@reno/core/providers";
-import { getCredits, spendCredit } from "../../../lib/credits";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { buildPrompt, dataUrlParts, getProvider, providers } from "@reno/core";
+import type { GenerateMode, GenerateRequest } from "@reno/core";
+import {
+  attachVisitorCookie,
+  getRemainingCredits,
+  resolveVisitorId,
+  serverKeyFor,
+  spendCredit,
+} from "@/lib/credits";
 
-type GenerateBody = Partial<GenerateRequest> & {
-  provider?: string;
-  apiKey?: string;
-};
+export const runtime = "nodejs";
 
-const envKeys: Record<string, string | undefined> = {
-  gemini: process.env.GEMINI_API_KEY,
-  openai: process.env.OPENAI_API_KEY,
-  replicate: process.env.REPLICATE_API_TOKEN
-};
-
-function isMode(value: unknown): value is GenerateMode {
-  return value === "restyle" || value === "renovate";
-}
-
-function errorStatus(error: unknown): number {
-  if (!(error instanceof Error)) {
-    return 500;
-  }
-
-  if (
-    error.message.startsWith("Missing") ||
-    error.message.startsWith("Mode must") ||
-    error.message.startsWith("Expected") ||
-    error.message.startsWith("Unknown provider")
-  ) {
-    return 400;
-  }
-
-  return 500;
-}
-
-function validateBody(body: GenerateBody): GenerateRequest {
-  if (!body.image || typeof body.image !== "string") {
-    throw new Error("Missing image data URL.");
-  }
-  dataUrlParts(body.image);
-  if (!body.style || typeof body.style !== "string") {
-    throw new Error("Missing style.");
-  }
-  if (!body.room || typeof body.room !== "string") {
-    throw new Error("Missing room.");
-  }
-  if (!isMode(body.mode)) {
-    throw new Error("Mode must be restyle or renovate.");
-  }
-
-  return {
-    image: body.image,
-    style: body.style,
-    room: body.room,
-    mode: body.mode,
-    notes: typeof body.notes === "string" ? body.notes : undefined
-  };
-}
-
-export async function GET() {
-  return NextResponse.json({
-    credits: await getCredits(),
-    providers: providers.map((provider) => ({
-      id: provider.id,
-      name: provider.name,
-      model: provider.model,
-      configured: Boolean(envKeys[provider.id])
-    }))
+/**
+ * GET /api/generate
+ * Returns the visitor's remaining hosted credits and provider availability.
+ */
+export async function GET(req: NextRequest) {
+  const { id, isNew } = resolveVisitorId(req);
+  const res = NextResponse.json({
+    credits: getRemainingCredits(id),
+    providers: providers.map((p) => ({
+      id: p.id,
+      name: p.name,
+      model: p.model,
+      configured: Boolean(serverKeyFor(p.id)),
+    })),
   });
+  if (isNew) attachVisitorCookie(res, id);
+  return res;
 }
 
-export async function POST(request: Request) {
+interface GenerateBody {
+  image?: unknown;
+  style?: unknown;
+  room?: unknown;
+  mode?: unknown;
+  notes?: unknown;
+  provider?: unknown;
+  apiKey?: unknown;
+}
+
+function asString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/**
+ * POST /api/generate
+ * Runs one image-to-image generation.
+ * - BYO key in the request body → free, never touches hosted credits.
+ * - Server env key → requires credits; a credit is spent ONLY after the
+ *   provider generation succeeds.
+ */
+export async function POST(req: NextRequest) {
+  const { id: visitorId, isNew } = resolveVisitorId(req);
+  const respond = (status: number, body: Record<string, unknown>) => {
+    const res = NextResponse.json(body, { status });
+    if (isNew) attachVisitorCookie(res, visitorId);
+    return res;
+  };
+
+  let body: GenerateBody;
   try {
-    const body = (await request.json()) as GenerateBody;
-    const req = validateBody(body);
-    const providerId = body.provider || process.env.DEFAULT_PROVIDER || "gemini";
-    const provider = getProvider(providerId);
-    const byoKey = typeof body.apiKey === "string" && body.apiKey.trim() ? body.apiKey.trim() : "";
-    const apiKey = byoKey || envKeys[provider.id];
+    body = (await req.json()) as GenerateBody;
+  } catch {
+    return respond(400, { error: "Request body must be JSON.", code: "INVALID_BODY" });
+  }
 
-    if (!apiKey) {
-      return NextResponse.json({ error: "No API key configured for this provider.", code: "NO_API_KEY" }, { status: 400 });
-    }
+  const image = typeof body.image === "string" ? body.image : "";
+  try {
+    dataUrlParts(image);
+  } catch (err) {
+    return respond(400, {
+      error: err instanceof Error ? err.message : "Invalid image.",
+      code: "INVALID_IMAGE",
+    });
+  }
 
-    if (!byoKey) {
-      const current = await getCredits();
-      if (current <= 0) {
-        return NextResponse.json({ error: "No free credits remaining.", code: "NO_CREDITS" }, { status: 402 });
-      }
-    }
+  const style = asString(body.style);
+  const room = asString(body.room);
+  const mode: GenerateMode | "" =
+    body.mode === "restyle" || body.mode === "renovate" ? body.mode : "";
+  if (!style || !room || !mode) {
+    return respond(400, {
+      error: "style, room, and mode ('restyle' | 'renovate') are required.",
+      code: "INVALID_REQUEST",
+    });
+  }
 
-    const result = await provider.generate(req, buildPrompt(req), apiKey);
-    const credits = byoKey ? await getCredits() : await spendCredit();
-    return NextResponse.json({ result, credits, free: Boolean(byoKey) });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Generation failed." },
-      { status: errorStatus(error) }
-    );
+  const providerId = asString(body.provider) || process.env.DEFAULT_PROVIDER || "gemini";
+  const provider = getProvider(providerId);
+  if (!provider) {
+    return respond(400, {
+      error: `Unknown provider "${providerId}".`,
+      code: "UNKNOWN_PROVIDER",
+    });
+  }
+
+  const byoKey = asString(body.apiKey);
+  const serverKey = serverKeyFor(provider.id);
+  const apiKey = byoKey || serverKey;
+  if (!apiKey) {
+    return respond(400, {
+      error: `No API key available for ${provider.name}. Paste your own key in Studio, or configure the server.`,
+      code: "NO_API_KEY",
+    });
+  }
+
+  const usingServerKey = !byoKey;
+  if (usingServerKey && getRemainingCredits(visitorId) <= 0) {
+    return respond(402, {
+      error:
+        "You're out of free renders. Add your own API key for unlimited free renders, or buy a credit pack.",
+      code: "NO_CREDITS",
+      credits: 0,
+    });
+  }
+
+  const notes = asString(body.notes);
+  const request: GenerateRequest = {
+    image,
+    style,
+    room,
+    mode,
+    ...(notes ? { notes } : {}),
+  };
+  const prompt = buildPrompt(request);
+
+  try {
+    const result = await provider.generate(request, prompt, apiKey);
+    // Spend AFTER success only. BYO-key renders never spend hosted credits.
+    const credits = usingServerKey
+      ? spendCredit(visitorId)
+      : getRemainingCredits(visitorId);
+    return respond(200, { ...result, credits });
+  } catch (err) {
+    return respond(502, {
+      error: err instanceof Error ? err.message : "Generation failed.",
+      code: "PROVIDER_ERROR",
+      credits: getRemainingCredits(visitorId),
+    });
   }
 }

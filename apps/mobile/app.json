@@ -5,9 +5,21 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "assetBundlePatterns": ["**/*"],
+    "backgroundColor": "#0f1115",
+    "ios": {
+      "supportsTablet": true
+    },
     "android": {
       "package": "com.reno.app"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Reno needs photo access so you can redesign a picture of your space.",
+          "cameraPermission": "Reno needs camera access so you can photograph your space."
+        }
+      ]
+    ]
   }
 }

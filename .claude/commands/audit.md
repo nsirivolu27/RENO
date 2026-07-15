@@ -1,8 +1,1 @@
-Audit this codebase or path: $ARGUMENTS
-
-1. Read the code and map the architecture and data flow. Summarize your understanding first.
-2. Identify questionable architecture decisions, duplicate logic, performance risks, scalability risks, and maintainability issues.
-3. Rank findings by impact and cite specific files/lines.
-4. Propose refactoring strategies, but do not change code yet.
-
-Never change product behavior during an audit.
+Audit the Reno codebase against docs/PRODUCT.md and CLAUDE.md. Check: (1) the BYO-key/self-host path works with empty env vars, (2) no OpenReno / @openreno / old storage keys (or_key, or_provider, or_visitor, openreno_*) anywhere, (3) credits are checked before generation and spent only after success, (4) providers stay isolated in packages/core with one MODEL constant each, (5) strict typecheck and build pass. Report findings ordered by severity with file:line references and a proposed fix for each.

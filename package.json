@@ -2,25 +2,17 @@
   "name": "reno",
   "version": "0.1.0",
   "private": true,
-  "description": "Reno, an open-source AI renovation app.",
   "license": "MIT",
+  "description": "Reno — open-source AI renovation and design demo app",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "packages/core",
+    "apps/web",
+    "apps/mobile"
   ],
   "scripts": {
-    "dev": "npm run dev -w @reno/web",
-    "mobile": "npm run start -w @reno/mobile",
-    "build": "npm run typecheck -w @reno/core && npm run build -w @reno/web",
-    "typecheck": "npm run typecheck -w @reno/core && npm run typecheck -w @reno/web"
-  },
-  "overrides": {
-    "@types/react": "18.3.31",
-    "@types/react-dom": "18.3.7",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "devDependencies": {
-    "typescript": "^5.6.3"
+    "dev": "npm run dev --workspace @reno/web",
+    "mobile": "npm run start --workspace @reno/mobile",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspace @reno/web"
   }
 }

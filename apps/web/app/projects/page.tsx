@@ -1,39 +1,48 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import Link from "next/link";
 import { ROOMS, STYLES } from "@reno/core";
 import type { DemoProject } from "@reno/core";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { localProjectStore } from "../../lib/projectStore";
+import { localProjectStore } from "@/lib/projectStore";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<DemoProject[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const importRef = useRef<HTMLInputElement>(null);
+
+  // Create form state
   const [name, setName] = useState("");
   const [clientName, setClientName] = useState("");
-  const [room, setRoom] = useState("living room");
+  const [room, setRoom] = useState<string>(ROOMS[0] ?? "living room");
   const [notes, setNotes] = useState("");
   const [designDirection, setDesignDirection] = useState("");
-  const [preferredStyles, setPreferredStyles] = useState<string[]>(["modern-minimal"]);
-  const [error, setError] = useState("");
-  const importInputRef = useRef<HTMLInputElement | null>(null);
+  const [preferredStyles, setPreferredStyles] = useState<string[]>([]);
+
+  const refresh = async () => {
+    setProjects(await localProjectStore.list());
+    setLoaded(true);
+  };
 
   useEffect(() => {
-    localProjectStore
-      .list()
-      .then(setProjects)
-      .catch(() => setError("Could not load projects from this browser."));
+    refresh().catch(() =>
+      setError("Could not read saved projects from browser storage.")
+    );
   }, []);
 
-  function toggleStyle(styleId: string) {
-    setPreferredStyles((current) =>
-      current.includes(styleId)
-        ? current.filter((id) => id !== styleId)
-        : [...current, styleId]
+  const togglePreferred = (id: string) => {
+    setPreferredStyles((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
-  }
+  };
 
-  async function createProject() {
-    setError("");
+  const createProject = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setNotice(null);
     try {
       const project = await localProjectStore.create({
         name,
@@ -41,127 +50,216 @@ export default function ProjectsPage() {
         room,
         notes,
         designDirection,
-        preferredStyles
+        preferredStyles,
       });
-      setProjects(await localProjectStore.list());
       setName("");
       setClientName("");
       setNotes("");
       setDesignDirection("");
-      setPreferredStyles(["modern-minimal"]);
-      window.location.href = `/studio?project=${encodeURIComponent(project.id)}`;
+      setPreferredStyles([]);
+      await refresh();
+      setNotice(`Created "${project.name}".`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create project.");
     }
-  }
+  };
 
-  async function importProject(file: File | undefined) {
+  const onImport = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    setError("");
+    setError(null);
+    setNotice(null);
     try {
-      const imported = JSON.parse(await file.text()) as DemoProject;
-      await localProjectStore.importProject(imported);
-      setProjects(await localProjectStore.list());
-      if (importInputRef.current) {
-        importInputRef.current.value = "";
+      const text = await file.text();
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        throw new Error("That file isn't valid JSON.");
       }
+      const imported = await localProjectStore.importProject(
+        parsed as DemoProject
+      );
+      await refresh();
+      setNotice(`Imported "${imported.name}".`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not import this project JSON.");
+      setError(err instanceof Error ? err.message : "Import failed.");
     }
-  }
+  };
 
   return (
-    <main className="projectsPage">
-      <header className="studioHeader">
-        <Link className="logo" href="/">Re<span>no</span></Link>
-        <Link href="/studio">Studio</Link>
-      </header>
-
-      <section className="projectsHero">
+    <div className="container">
+      <div className="studio-head">
         <div>
-          <p className="eyebrow">Client demo projects</p>
-          <h1>Package renovation ideas around a real client space.</h1>
-          <p className="lede">
-            Keep project direction, preferred styles, and generated concepts together in this browser. Supabase can replace this local store later without changing provider logic.
+          <h1>Client demo projects</h1>
+          <p style={{ color: "var(--text-dim)", margin: 0 }}>
+            Local-first — everything is stored in this browser. Export to move
+            or back up a project.
           </p>
         </div>
-      </section>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => importRef.current?.click()}
+        >
+          Import project JSON
+        </button>
+        <input
+          ref={importRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={onImport}
+          style={{ display: "none" }}
+          aria-label="Import project JSON file"
+        />
+      </div>
 
-      <div className="projectLayout">
-        <section className="projectPanel">
-          <h2>Create Demo</h2>
-          <label className="field">
-            <span>Project name</span>
-            <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Maple Street kitchen refresh" />
-          </label>
-          <label className="field">
-            <span>Client name</span>
-            <input value={clientName} onChange={(event) => setClientName(event.target.value)} placeholder="Optional" />
-          </label>
-          <label className="field">
-            <span>Space type</span>
-            <select value={room} onChange={(event) => setRoom(event.target.value)}>
-              {ROOMS.map((entry) => <option key={entry}>{entry}</option>)}
-            </select>
-          </label>
-          <label className="field">
-            <span>Project notes</span>
-            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Budget range, constraints, client goals..." />
-          </label>
-          <label className="field">
-            <span>Custom design direction/materials</span>
-            <textarea value={designDirection} onChange={(event) => setDesignDirection(event.target.value)} placeholder="White oak cabinets, zellige tile, warm brass hardware, keep existing island..." />
-          </label>
+      {error && (
+        <div className="alert alert-error" role="alert">
+          {error}
+        </div>
+      )}
+      {notice && <div className="alert alert-ok">{notice}</div>}
+
+      <div className="projects-grid">
+        {/* -------- Create form -------- */}
+        <form className="studio-panel" onSubmit={createProject}>
+          <h2 style={{ fontSize: "1.15rem" }}>New project</h2>
+
           <div className="field">
-            <span>Preferred styles</span>
-            <div className="styleGrid compact">
-              {STYLES.map((style) => (
+            <label htmlFor="p-name">Project name</label>
+            <input
+              id="p-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Maple St living room refresh"
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="p-client">Client name (optional)</label>
+            <input
+              id="p-client"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              placeholder="e.g. The Novaks"
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="p-room">Room / space type</label>
+            <select
+              id="p-room"
+              value={room}
+              onChange={(e) => setRoom(e.target.value)}
+            >
+              {ROOMS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="p-notes">Project notes (optional)</label>
+            <textarea
+              id="p-notes"
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g. budget-conscious, pets, keep the fireplace"
+            />
+          </div>
+
+          <div className="field">
+            <label id="p-styles-label">Preferred styles</label>
+            <div className="chip-row" role="group" aria-labelledby="p-styles-label">
+              {STYLES.map((s) => (
                 <button
+                  key={s.id}
                   type="button"
-                  className={preferredStyles.includes(style.id) ? "styleTile active" : "styleTile"}
-                  key={style.id}
-                  onClick={() => toggleStyle(style.id)}
+                  className={`chip${preferredStyles.includes(s.id) ? " active" : ""}`}
+                  onClick={() => togglePreferred(s.id)}
+                  aria-pressed={preferredStyles.includes(s.id)}
                 >
-                  {style.name}
+                  {s.name}
                 </button>
               ))}
             </div>
           </div>
-          {error ? <p className="error">{error}</p> : null}
-          <button className="button primary" type="button" onClick={() => void createProject()}>Create and open Studio</button>
-        </section>
 
-        <section className="projectPanel">
-          <h2>Saved Demos</h2>
-          <div className="importRow">
-            <input
-              ref={importInputRef}
-              type="file"
-              accept="application/json,.json"
-              onChange={(event) => void importProject(event.target.files?.[0])}
+          <div className="field">
+            <label htmlFor="p-direction">
+              Design direction / materials (optional)
+            </label>
+            <textarea
+              id="p-direction"
+              rows={3}
+              value={designDirection}
+              onChange={(e) => setDesignDirection(e.target.value)}
+              placeholder="e.g. white oak floors, matte black hardware, no open shelving, warm neutral palette"
             />
+            <span className="hint">
+              Applied automatically to every render generated for this project.
+            </span>
           </div>
-          {projects.length ? (
-            <div className="projectList">
-              {projects.map((project) => (
-                <article className="projectItem" key={project.id}>
-                  <div>
-                    <h3>{project.name}</h3>
-                    <p>{project.clientName ? `${project.clientName} - ` : ""}{project.room}</p>
-                    <p>{project.renders.length} concepts - {project.preferredStyles.length} preferred styles</p>
-                  </div>
-                  <div className="projectActions">
-                    <Link className="button" href={`/studio?project=${project.id}`}>Open Studio</Link>
-                    <Link className="button" href={`/projects/${project.id}`}>Demo View</Link>
-                  </div>
-                </article>
-              ))}
+
+          <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
+            Create project
+          </button>
+        </form>
+
+        {/* -------- Project list -------- */}
+        <div>
+          {!loaded ? (
+            <div className="empty-state">Loading projects…</div>
+          ) : projects.length === 0 ? (
+            <div className="empty-state">
+              <h3 style={{ color: "var(--text)" }}>No projects yet</h3>
+              <p>
+                Create your first client demo project on the left, or import a
+                project JSON exported from another device.
+              </p>
+              <p>
+                Projects collect saved renders, client preferences, and design
+                direction — then present them as a clean demo.
+              </p>
             </div>
           ) : (
-            <div className="emptyState compactEmpty">No demo projects yet.</div>
+            projects.map((p) => (
+              <div key={p.id} className="project-card">
+                <h3>{p.name}</h3>
+                <p className="meta">
+                  {p.clientName ? `${p.clientName} · ` : ""}
+                  {p.room} · {p.renders.length} render
+                  {p.renders.length === 1 ? "" : "s"}
+                  {p.renders.some((r) => r.favorite)
+                    ? ` · ★ ${p.renders.filter((r) => r.favorite).length} favorite`
+                    : ""}
+                </p>
+                {p.designDirection && (
+                  <p className="meta" style={{ fontStyle: "italic" }}>
+                    “{p.designDirection}”
+                  </p>
+                )}
+                <div className="actions">
+                  <Link
+                    href={`/studio?project=${p.id}`}
+                    className="btn btn-sm btn-primary"
+                  >
+                    Open Studio
+                  </Link>
+                  <Link href={`/projects/${p.id}`} className="btn btn-sm">
+                    Demo View
+                  </Link>
+                </div>
+              </div>
+            ))
           )}
-        </section>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

@@ -1,11 +1,1 @@
-Plan how to find the first 10 customers for: $ARGUMENTS
-
-Output:
-
-- Where the first 10 are right now.
-- Manual outreach approach.
-- First message asking for a conversation, not a sale.
-- Success criteria.
-- Weekly milestone plan from zero to 10.
-
-No ads, automation, or scale tactics.
+Plan how Reno gets its first 10 real users (not friends). Identify where renovation pros and staging teams already gather, draft a concrete outreach message that leads with a before/after render of THEIR listing/space type, and define what we must observe in their first session (activation: first successful render; retention: first saved project). Propose the 3 cheapest experiments and what result would kill or continue each.

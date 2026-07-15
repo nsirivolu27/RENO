@@ -1,52 +1,77 @@
-import { dataUrlParts } from "../types";
 import type { GenerateRequest, GenerateResult, Provider } from "../types";
+import { dataUrlParts } from "../types";
 
 export const MODEL = "gemini-2.5-flash-image";
 
-interface GeminiResponse {
-  candidates?: Array<{
-    content?: {
-      parts?: Array<{
-        inlineData?: { mimeType: string; data: string };
-        text?: string;
-      }>;
-    };
-  }>;
+const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+
+interface GeminiInlineData {
+  mimeType?: string;
+  data?: string;
 }
 
-export const geminiProvider: Provider = {
+interface GeminiPart {
+  inlineData?: GeminiInlineData;
+  text?: string;
+}
+
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: { parts?: GeminiPart[] };
+  }>;
+  error?: { message?: string };
+}
+
+export const gemini: Provider = {
   id: "gemini",
-  name: "Gemini",
+  name: "Google Gemini",
   model: MODEL,
-  async generate(req: GenerateRequest, prompt: string, apiKey: string): Promise<GenerateResult> {
+
+  async generate(
+    req: GenerateRequest,
+    prompt: string,
+    apiKey: string
+  ): Promise<GenerateResult> {
     const { mimeType, base64 } = dataUrlParts(req.image);
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
+
+    const res = await fetch(ENDPOINT, {
       method: "POST",
       headers: {
-        "content-type": "application/json",
-        "x-goog-api-key": apiKey
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
         contents: [
           {
-            role: "user",
-            parts: [{ inlineData: { mimeType, data: base64 } }, { text: prompt }]
-          }
+            parts: [
+              { inlineData: { mimeType, data: base64 } },
+              { text: prompt },
+            ],
+          },
         ],
-        generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
-      })
+      }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Gemini failed: ${response.status} ${await response.text()}`);
+    const json = (await res.json().catch(() => ({}))) as GeminiResponse;
+    if (!res.ok) {
+      throw new Error(
+        `Gemini request failed (${res.status}): ${json.error?.message ?? "unknown error"}`
+      );
     }
 
-    const json = (await response.json()) as GeminiResponse;
-    const image = json.candidates?.[0]?.content?.parts?.find((part) => part.inlineData?.data)?.inlineData;
-    if (!image) {
-      throw new Error("Gemini did not return an image.");
+    const parts = json.candidates?.[0]?.content?.parts ?? [];
+    for (const part of parts) {
+      const data = part.inlineData?.data;
+      if (data) {
+        const outMime = part.inlineData?.mimeType ?? "image/png";
+        return {
+          image: `data:${outMime};base64,${data}`,
+          provider: "gemini",
+          model: MODEL,
+        };
+      }
     }
 
-    return { image: `data:${image.mimeType};base64,${image.data}`, provider: this.id, model: MODEL };
-  }
+    throw new Error("Gemini returned no image. Try a different photo or prompt.");
+  },
 };

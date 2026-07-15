@@ -1,158 +1,175 @@
-"use client";
+import type {
+  CreateDemoProjectInput,
+  CreateProjectRenderInput,
+  DemoProject,
+  ProjectRender,
+} from "@reno/core";
+import { createDemoProject, createProjectRender } from "@reno/core";
 
-import { createDemoProject } from "@reno/core";
-import type { CreateDemoProjectInput, DemoProject, ProjectRender } from "@reno/core";
-
-const PROJECTS_KEY = "reno_projects";
-
+/**
+ * Local-first project storage.
+ *
+ * The interface is Promise-based on purpose: a future hosted implementation
+ * (Supabase) can drop in behind the same contract without touching the UI.
+ */
 export interface ProjectStore {
   list(): Promise<DemoProject[]>;
-  get(id: string): Promise<DemoProject | undefined>;
+  get(id: string): Promise<DemoProject | null>;
   create(input: CreateDemoProjectInput): Promise<DemoProject>;
   importProject(project: DemoProject): Promise<DemoProject>;
-  addRender(projectId: string, render: ProjectRender): Promise<DemoProject>;
+  addRender(
+    projectId: string,
+    render: CreateProjectRenderInput
+  ): Promise<ProjectRender>;
   toggleFavorite(projectId: string, renderId: string): Promise<DemoProject>;
   remove(projectId: string): Promise<void>;
 }
 
-function readProjects(): DemoProject[] {
+const STORAGE_KEY = "reno_projects";
+
+const QUOTA_MESSAGE =
+  "Browser storage is full. Export or delete a project before saving more renders.";
+
+function isQuotaError(err: unknown): boolean {
+  return (
+    err instanceof DOMException &&
+    (err.name === "QuotaExceededError" ||
+      err.name === "NS_ERROR_DOM_QUOTA_REACHED")
+  );
+}
+
+function readAll(): DemoProject[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(PROJECTS_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as DemoProject[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as DemoProject[]) : [];
   } catch {
     return [];
   }
 }
 
-function writeProjects(projects: DemoProject[]) {
+function writeAll(projects: DemoProject[]): void {
   try {
-    window.localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
-  } catch (error) {
-    throw new Error(
-      error instanceof DOMException && error.name === "QuotaExceededError"
-        ? "Browser storage is full. Export or delete a project before saving more renders."
-        : "Could not save project data in this browser."
-    );
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  } catch (err) {
+    if (isQuotaError(err)) {
+      throw new Error(QUOTA_MESSAGE);
+    }
+    throw err;
   }
 }
 
-function touch(project: DemoProject): DemoProject {
-  return { ...project, updatedAt: new Date().toISOString() };
+function mustFind(projects: DemoProject[], id: string): DemoProject {
+  const project = projects.find((p) => p.id === id);
+  if (!project) {
+    throw new Error("Project not found. It may have been deleted.");
+  }
+  return project;
 }
 
-function asString(value: unknown, fallback = ""): string {
-  return typeof value === "string" ? value : fallback;
-}
-
-function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
-}
-
-function normalizeImportedProject(input: DemoProject, existingProjects: DemoProject[]): DemoProject {
-  const now = new Date().toISOString();
-  const baseId = asString(input.id, `project_imported_${Date.now()}`);
-  const id = existingProjects.some((project) => project.id === baseId)
-    ? `${baseId}_copy_${Date.now()}`
-    : baseId;
-
-  return {
-    id,
-    name: asString(input.name, "Imported demo").trim() || "Imported demo",
-    clientName: asString(input.clientName).trim() || undefined,
-    room: asString(input.room, "living room"),
-    notes: asString(input.notes).trim() || undefined,
-    preferredStyles: asStringArray(input.preferredStyles),
-    designDirection: asString(input.designDirection).trim() || undefined,
-    renders: Array.isArray(input.renders) ? input.renders : [],
-    createdAt: asString(input.createdAt, now),
-    updatedAt: now
-  };
+/** Loose structural check for imported JSON. */
+export function looksLikeDemoProject(value: unknown): value is DemoProject {
+  if (typeof value !== "object" || value === null) return false;
+  const p = value as Record<string, unknown>;
+  return (
+    typeof p.id === "string" &&
+    typeof p.name === "string" &&
+    typeof p.room === "string" &&
+    Array.isArray(p.renders) &&
+    Array.isArray(p.preferredStyles)
+  );
 }
 
 export const localProjectStore: ProjectStore = {
   async list() {
-    return readProjects().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    return readAll().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   },
-  async get(id: string) {
-    return readProjects().find((project) => project.id === id);
+
+  async get(id) {
+    return readAll().find((p) => p.id === id) ?? null;
   },
-  async create(input: CreateDemoProjectInput) {
+
+  async create(input) {
     const project = createDemoProject(input);
-    writeProjects([project, ...readProjects()]);
+    writeAll([project, ...readAll()]);
     return project;
   },
-  async importProject(project: DemoProject) {
-    const projects = readProjects();
-    const importedProject = normalizeImportedProject(project, projects);
-    writeProjects([importedProject, ...projects]);
-    return importedProject;
-  },
-  async addRender(projectId: string, render: ProjectRender) {
-    let updated: DemoProject | undefined;
-    const projects = readProjects().map((project) => {
-      if (project.id !== projectId) return project;
-      updated = touch({ ...project, renders: [render, ...project.renders] });
-      return updated;
-    });
-    if (!updated) {
-      throw new Error("Project not found.");
+
+  async importProject(project) {
+    if (!looksLikeDemoProject(project)) {
+      throw new Error(
+        "This file doesn't look like a Reno project export. Expected a project JSON exported from the Demo View."
+      );
     }
-    writeProjects(projects);
-    return updated;
+    const all = readAll();
+    // Avoid id collisions with an already-saved project.
+    const id = all.some((p) => p.id === project.id)
+      ? `${project.id}-${Date.now().toString(36)}`
+      : project.id;
+    const imported: DemoProject = {
+      ...project,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    writeAll([imported, ...all]);
+    return imported;
   },
-  async toggleFavorite(projectId: string, renderId: string) {
-    let updated: DemoProject | undefined;
-    const projects = readProjects().map((project) => {
-      if (project.id !== projectId) return project;
-      updated = touch({
-        ...project,
-        renders: project.renders.map((render) =>
-          render.id === renderId ? { ...render, favorite: !render.favorite } : render
-        )
-      });
-      return updated;
-    });
-    if (!updated) {
-      throw new Error("Project not found.");
-    }
-    writeProjects(projects);
-    return updated;
+
+  async addRender(projectId, input) {
+    const all = readAll();
+    const project = mustFind(all, projectId);
+    const render = createProjectRender(input);
+    project.renders = [render, ...project.renders];
+    project.updatedAt = new Date().toISOString();
+    writeAll(all);
+    return render;
   },
-  async remove(projectId: string) {
-    writeProjects(readProjects().filter((project) => project.id !== projectId));
-  }
+
+  async toggleFavorite(projectId, renderId) {
+    const all = readAll();
+    const project = mustFind(all, projectId);
+    project.renders = project.renders.map((r) =>
+      r.id === renderId ? { ...r, favorite: !r.favorite } : r
+    );
+    project.updatedAt = new Date().toISOString();
+    writeAll(all);
+    return project;
+  },
+
+  async remove(projectId) {
+    writeAll(readAll().filter((p) => p.id !== projectId));
+  },
 };
 
-function loadImage(dataUrl: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Could not prepare image for project storage."));
-    image.src = dataUrl;
+/**
+ * Compresses a data-URL image before it goes into localStorage:
+ * resize so the longest side is <= 1600px, re-encode as JPEG q≈0.82.
+ */
+export async function compressProjectImage(dataUrl: string): Promise<string> {
+  if (typeof document === "undefined") return dataUrl;
+
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error("Could not load image for compression."));
+    el.src = dataUrl;
   });
-}
 
-export async function compressProjectImage(dataUrl: string, maxSide = 1600, quality = 0.82): Promise<string> {
-  if (!dataUrl.startsWith("data:image/")) {
-    return dataUrl;
-  }
-
-  const image = await loadImage(dataUrl);
-  const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const maxSide = 1600;
+  const scale = Math.min(
+    1,
+    maxSide / Math.max(img.naturalWidth, img.naturalHeight)
+  );
+  const width = Math.max(1, Math.round(img.naturalWidth * scale));
+  const height = Math.max(1, Math.round(img.naturalHeight * scale));
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  const context = canvas.getContext("2d");
-  if (!context) {
-    return dataUrl;
-  }
-
-  context.drawImage(image, 0, 0, width, height);
-  return canvas.toDataURL("image/jpeg", quality);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return dataUrl;
+  ctx.drawImage(img, 0, 0, width, height);
+  return canvas.toDataURL("image/jpeg", 0.82);
 }

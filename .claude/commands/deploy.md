@@ -1,14 +1,1 @@
-Prepare Reno for deployment target: $ARGUMENTS
-
-Match the solution to the target scale. Do not add Kubernetes or heavy infrastructure unless explicitly requested.
-
-Provide:
-
-- Deployment workflow.
-- Required env vars.
-- CI/CD plan.
-- Monitoring/logging/error tracking basics.
-- Rollback plan.
-- Self-host path that works without Stripe/Supabase.
-
-Prefer Vercel for the web app unless another target is specified.
+Prepare Reno for deployment. Verify npm run build passes clean, document required env vars from .env.example, and confirm both modes work in production config: hosted (keys set, credits enforced) and self-host (no keys, BYO-key renders unlimited). Check next.config body size limits and that no dev-only behavior (in-memory credits reset, localhost URLs) surprises a self-hoster. Produce a short deploy checklist rather than adding infrastructure.

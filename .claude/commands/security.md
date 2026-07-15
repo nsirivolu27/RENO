@@ -1,13 +1,1 @@
-Security audit of: $ARGUMENTS
-
-Check for:
-
-- Injection risks.
-- Auth/session flaws.
-- Missing authorization checks.
-- Sensitive data exposure in code, logs, responses, or storage.
-- Unsafe file/input handling.
-- Insecure dependencies.
-- API key leakage.
-
-Output a report with severity, file/line, realistic attack scenario, and fix. Do not change code until fixes are selected.
+Security review of Reno. Focus: API key handling (BYO keys must never be logged, stored server-side, or echoed back), input validation on /api/generate (data URL validation before any key/credit logic), cookie flags on reno_visitor, injection risks in prompt building, dependency risk, and anything that could leak one visitor's data to another. Report issues by severity with concrete exploits and fixes. Do not add auth or new services — flag where they'd belong instead.

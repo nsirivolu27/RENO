@@ -1,12 +1,1 @@
-Profile and optimize: $ARGUMENTS
-
-First measure. Do not optimize by guessing.
-
-Identify:
-
-- Inefficient logic.
-- Expensive operations.
-- Unnecessary rendering.
-- Memory/storage issues.
-
-Rank by measured impact. Optimize only the top items and re-run the measurement after each change.
+Profile and improve Reno performance without adding dependencies. Likely suspects: oversized data URLs in localStorage (compression path), unnecessary re-renders in Studio, large landing payloads, and slow provider polling. Measure first (numbers, not vibes), fix the top bottleneck, measure again, and report before/after. Do not sacrifice image quality below the documented 1600px / q0.82 without asking.

@@ -1,34 +1,23 @@
-# Claude Guidance For Reno
+# CLAUDE.md — working on Reno
 
-Reno is an MIT open-source AI renovation/design demo app. It serves two workflows:
+Instructions for AI agents (and humans) working in this repo.
 
-- Everyday users exploring redesign ideas for residential or corporate spaces.
-- Renovators, designers, and contractors creating client-ready demo projects.
+## Before major work
 
-Read `docs/PRODUCT.md`, `docs/PRODUCT_PLAN.md`, `docs/ARCHITECTURE.md`, and `docs/CODING_STANDARDS.md` before making non-trivial product or architecture changes.
+- Read `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, and `docs/CODING_STANDARDS.md` before any non-trivial change. `docs/PRODUCT.md` is canonical.
+- Ask clarifying questions for non-trivial or ambiguous requests instead of guessing.
+- Push back when a simpler approach exists. Prefer deleting code to adding it.
 
-## Working Rules
+## Hard rules
 
-- Before implementing any non-trivial request, clarify ambiguity and push back if there is a simpler or safer approach.
-- Prioritize simplicity and long-term maintainability over cleverness.
-- Present tradeoffs when there is a real decision.
-- Keep the self-host/BYO-key path working without Stripe, Supabase, or paid Reno services.
-- Do not reintroduce `OpenReno`, `@openreno`, or old storage/cookie keys.
-- Do not force-push or overwrite Codex work.
-- Prefer branch-based work. Current feature work should branch from the latest relevant Reno branch.
-- Keep provider HTTP details isolated in `packages/core/src/providers`.
-- Keep local project storage behind the `ProjectStore` interface so Supabase can replace it later.
+- The product is **Reno**. Never use the name "OpenReno" anywhere, and never use the `@openreno` package scope — the scope is `@reno`.
+- Never use old storage keys (`openreno.*`, `openreno_*`, `or_key`, `or_provider`, `or_visitor`). The only storage keys are `reno_key`, `reno_provider`, `reno_visitor`, `reno_projects`.
+- **Preserve the BYO-key / self-host path.** BYO-key renders must stay free, unlimited, and independent of Stripe/Supabase/auth. Hosted features stay optional and env-driven.
+- Do not force push.
+- No Tailwind, no UI frameworks in `apps/web`. Plain CSS dark theme.
+- Providers live only in `packages/core/src/providers/`, one `MODEL` constant at the top of each file.
 
-## Coding Rules
+## Before finishing
 
-- TypeScript strict.
-- Use `import type` for type-only imports.
-- No Tailwind or UI framework.
-- Minimal dependencies.
-- Failed renders must not spend credits.
-- BYO API key renders must bypass hosted credits.
-- Run `npm run typecheck` and `npm run build` before handing off code.
-
-## Review Habit
-
-After implementing, re-read your own diff as an independent reviewer. List problems before fixing anything else.
+- Run `npm run typecheck` and `npm run build`; both must pass.
+- Credits semantics: check credits before generation, spend only after success, never for BYO keys.

@@ -1,14 +1,12 @@
-import { geminiProvider } from "./gemini";
-import { openaiProvider } from "./openai";
-import { replicateProvider } from "./replicate";
 import type { Provider } from "../types";
+import { gemini } from "./gemini";
+import { openai } from "./openai";
+import { replicate } from "./replicate";
 
-export const providers = [geminiProvider, openaiProvider, replicateProvider] as const;
+export const providers: Provider[] = [gemini, openai, replicate];
 
-export function getProvider(id: string): Provider {
-  const provider = providers.find((entry) => entry.id === id);
-  if (!provider) {
-    throw new Error(`Unknown provider: ${id}`);
-  }
-  return provider;
+export function getProvider(id: string): Provider | undefined {
+  return providers.find((p) => p.id === id);
 }
+
+export { gemini, openai, replicate };

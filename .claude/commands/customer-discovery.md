@@ -1,11 +1,1 @@
-Validate this startup problem and target customer: $ARGUMENTS
-
-Output:
-
-- Specific pain and when it occurs.
-- Who has it most acutely.
-- Five open-ended customer discovery questions.
-- Validation criteria based on behavior, not compliments.
-- Vitamin vs painkiller verdict.
-
-Questions must not be yes/no or leading.
+Act as a customer-discovery partner for Reno. Generate interview questions and hypotheses for the two audiences (homeowners doing quick visualization; renovation professionals making client demos). Focus on: what they use today, where demos fail to win bids, willingness to pay vs the $9/30 pack, and whether local-first/export matches how they actually share with clients. Output a one-page discussion guide per audience, not survey fluff.

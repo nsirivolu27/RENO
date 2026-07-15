@@ -1,40 +1,42 @@
-# Architecture
+# Reno — Architecture
 
-Reno starts as a modular monolith: one repository, one web API, shared core package, and clear provider boundaries.
+## Shape: modular monolith
 
-## Modules
+One deployable web app plus a shared core package and a thin mobile client. No microservices, no queues, no database — until a feature actually needs them.
 
-- `packages/core`: types, prompt builder, style presets, provider interface, provider adapters.
-- `apps/web/app`: Next.js pages and API routes.
-- `apps/web/lib`: server-side app services such as credits.
-- `apps/mobile`: Expo client that calls the web API.
+```
+packages/core        @reno/core (strict TS, zero runtime deps)
+  src/types.ts       GenerateRequest/Result, Provider interface, dataUrlParts
+  src/styles.ts      style presets, rooms, buildPrompt + architecture lock
+  src/projects.ts    DemoProject/ProjectRender model + factories
+  src/providers/     gemini, openai, replicate (one MODEL const each)
 
-## Data Flow
+apps/web             @reno/web (Next.js 15 App Router, plain CSS)
+  app/               landing, studio, projects, projects/[id], api/generate
+  lib/credits.ts     hosted-mode freemium stub (httpOnly cookie + in-memory Map)
+  lib/projectStore.ts local-first ProjectStore (localStorage) + image compression
 
-1. UI collects image, room, style, mode, notes, provider, and optional BYO key.
-2. `/api/generate` validates the data URL and provider.
-3. API resolves provider key from request first, then server env.
-4. Server-key renders check and spend credits.
-5. BYO-key renders skip credit spending.
-6. Provider returns a generated image data URL.
-7. UI displays before/after comparison.
-
-## Provider Boundary
-
-Providers implement:
-
-```ts
-generate(req, prompt, apiKey): Promise<GenerateResult>
+apps/mobile          @reno/mobile (Expo SDK 52 prototype, single App.tsx)
 ```
 
-The app should not depend on provider-specific request details outside `packages/core/src/providers`.
+## Ownership
 
-## Production Upgrade Path
+- **packages/core owns** shared types, the prompt model, style presets, the project data model, and all provider implementations. It is runtime-agnostic (fetch/FormData/atob only — no Node-specific APIs) so it runs in Next's server runtime and could run in an edge or worker runtime later.
+- **apps/web owns** UI, the API route, credit accounting, cookies, and local storage. Nothing in core knows about HTTP frameworks, cookies, or storage.
+- **apps/mobile owns** nothing shared; it is a deliberately standalone prototype that talks to the web API.
 
-- Replace in-memory credits with Supabase/Postgres `profiles.credits`.
-- Add Supabase auth and merge anonymous cookie credits on signup.
-- Add Stripe checkout, webhooks, and customer portal.
-- Persist render metadata and images in database/object storage.
-- Add public `/r/[id]` share pages and OG image generation.
+## The provider boundary
 
-Self-hosters can disable Supabase and Stripe by leaving those env vars unset.
+`Provider` is the only contract: `{ id, name, model, generate(req, prompt, apiKey) }` returning a base64 data URL. The API route resolves a provider by id, resolves a key (BYO from the request, else server env), builds the prompt via `buildPrompt`, and calls `generate`. Adding a provider means one new file in `core/src/providers/`, one registry line, and one env mapping in `lib/credits.ts` — no UI changes.
+
+## ProjectStore migration path
+
+`ProjectStore` is Promise-based even though localStorage is synchronous. That is intentional: a hosted implementation (Supabase: `projects` + `renders` tables, images in Storage buckets) can implement the same interface and be selected by env/auth state. UI code never touches localStorage directly.
+
+## Credits: stub now, real later
+
+`lib/credits.ts` keeps balances in an in-memory Map keyed by an httpOnly visitor cookie (`reno_visitor`). Semantics that must survive the migration to Postgres/Supabase + Stripe webhooks: check before generation, spend only after provider success, and never spend for BYO keys.
+
+## Supabase / Stripe are optional, forever
+
+Hosted-mode conveniences (auth, synced projects, purchased credits) are additive. The BYO-key/self-host path — browser key in `reno_key`, `/api/generate` with `apiKey` in the body — must keep working with zero external services and empty env vars.

@@ -1,10 +1,1 @@
-Debug this issue: $ARGUMENTS
-
-Rules:
-
-- Do not guess.
-- Trace the actual root cause before proposing a fix.
-- Read the relevant code and add logging or a reproducing test if needed.
-- Explain root cause, why it fails, hidden edge cases, and the minimal robust fix.
-
-Apply the fix only after approval, then run the relevant checks.
+Debug the issue I describe. First reproduce it (run the app or a minimal script), then trace the failing path across packages/core and apps/web before proposing a fix. State your hypothesis, the evidence, and the smallest fix. Do not refactor unrelated code while debugging. Finish by running npm run typecheck and verifying the reproduction is fixed.

@@ -1,6 +1,12 @@
-import ProjectDetailClient from "./ProjectDetailClient";
+import ProjectDemo from "./ProjectDemo";
 
-export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+interface DemoPageProps {
+  // Next 15: params is a Promise in server components.
+  params: Promise<{ id: string }>;
+}
+
+export default async function ProjectDemoPage({ params }: DemoPageProps) {
   const { id } = await params;
-  return <ProjectDetailClient projectId={id} />;
+  // Project data lives in localStorage, so all loading happens client-side.
+  return <ProjectDemo id={id} />;
 }

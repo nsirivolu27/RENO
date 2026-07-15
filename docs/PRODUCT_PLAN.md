@@ -1,50 +1,43 @@
-# Reno Product Plan
+# Reno — Product Plan
 
-## Product Spine
+## Two workflows, one engine
 
-Reno serves two workflows through the same rendering engine:
+The homeowner quick-render flow and the professional demo-project flow share the same generation engine: one prompt builder, one provider interface, one API route. The professional layer only *adds context* (project design direction, preferred styles, save/favorite/present); it never forks the generation path. Any improvement to generation quality benefits both audiences automatically.
 
-- Quick Design: homeowners, renters, office managers, and real-estate users upload a space photo and explore redesign options quickly.
-- Client Demo Projects: renovators, designers, and contractors package client spaces, design direction, and generated concepts into a reusable demo.
+## Design direction hierarchy
 
-The professional workflow should wrap Studio without making the simple homeowner path heavier.
+When a render is generated, direction is composed in this order (most specific last, appended to the prompt):
 
-## Design Direction Hierarchy
+1. **Mode contract** — restyle vs renovate rules (what may change).
+2. **Style preset** — rich materials/palette/lighting prompt from `packages/core/src/styles.ts`.
+3. **Render notes** — what the user typed for this specific generation.
+4. **Project direction** — the active project's design direction + project notes, appended automatically in Studio.
+5. **Architecture lock** — the fixed closing sentence that pins camera angle, dimensions, windows/doors, and photorealism.
 
-Generation direction should resolve in this order:
+## Local-first data model
 
-1. Custom project or design-pack direction.
-2. Built-in style preset.
-3. Session notes.
+Projects live entirely in the browser (`localStorage` key `reno_projects`) as `DemoProject[]`:
 
-Provider adapters stay unaware of projects, clients, brands, and design packs. They receive only the final request, prompt, and key.
+- `DemoProject`: id, name, clientName?, room, notes?, preferredStyles[], designDirection?, renders[], createdAt, updatedAt.
+- `ProjectRender`: id, style, mode, notes?, provider, model, beforeImage, afterImage (both compressed to ≤1600px JPEG q0.82), favorite, createdAt.
 
-## Local-First Data Model
-
-The first project layer uses browser storage:
-
-- `DemoProject`: project name, optional client name, room, notes, preferred styles, design direction, render list.
-- `ProjectRender`: before/after images, style, mode, notes, provider/model, favorite flag, timestamp.
-- `ProjectStore`: Promise-based storage boundary so Supabase can replace localStorage later without changing UI flow.
-- Saved project render images are compressed for browser storage; durable cloud storage should replace data URLs when persistence moves server-side.
+Portability is JSON export/import from the Demo View. The `ProjectStore` interface is Promise-based so a hosted Supabase store can replace localStorage without touching UI code.
 
 ## Roadmap
 
-1. Finish and verify MVP render flow.
-2. Add local-first professional project/client demos.
-3. Persist renders and add public share pages.
-4. Add optional Supabase auth and credit storage.
-5. Add optional Stripe checkout, subscriptions, and portal.
-6. Add importable design packs/custom style libraries.
-7. Add free-tier watermarking.
-8. Polish Vercel deployment and self-host configuration.
+1. **Now (MVP, this repo):** Studio + local demo projects + 3 providers + credits stub + mobile prototype.
+2. **Next:** Supabase auth + hosted project sync; Stripe credit packs; anonymous-credit merge on signup.
+3. **Then:** public share links for demo views; watermarked free renders; batch concept generation.
+4. **Later:** team workspaces, brand kits for staging companies, PDF proposal templates.
 
-## Definition Of Done For Local Demo Projects
+Every step after "Now" is optional infrastructure — the self-host/BYO path must keep working with none of it.
 
-- Create a project with client, room, notes, preferred styles, and design direction.
-- Open Studio with the project selected.
-- Keep no-project Studio behavior unchanged.
-- Append project direction to render notes without touching provider adapters.
-- Save successful renders to the project.
-- View saved concepts, compare before/after, mark favorites, and export project JSON.
-- Keep the feature local-first with no auth, database, Stripe, or new dependencies.
+## Definition of done — local demo projects
+
+- Create a project with name, client, room, notes, preferred styles, and design direction; unnamed projects default to "Untitled demo".
+- Open Studio via `?project=<id>`; project context is visible and direction is appended to every generation.
+- Save a successful render to the project with compressed before/after images; storage-quota failures give an actionable error.
+- Favorite/unfavorite renders from the Demo View.
+- Demo View presents title, client, room, direction, preferred styles, and a before/after render gallery; printing hides chrome and yields a clean white-background client proposal with unbroken render cards.
+- Export a project as JSON; import it on another device with helpful errors for invalid files.
+- Delete a project with confirmation.

@@ -1,16 +1,1 @@
-Build or improve this UI: $ARGUMENTS
-
-Before implementation, propose the component/page structure and user flow.
-
-Requirements checklist:
-
-- Loading state.
-- Empty state.
-- Error state.
-- Long text and zero-item edge cases.
-- Responsive layout.
-- Keyboard navigation and ARIA accessibility where relevant.
-- No Tailwind or UI framework.
-- Match Reno's existing dark UI and `Re<span>no</span>` logo treatment.
-
-Run `npm run typecheck` and `npm run build` before finishing.
+Work on Reno web UI. Constraints: plain CSS in app/globals.css only (no Tailwind, no UI frameworks, no CSS-in-JS), dark theme via the existing CSS variables, single warm accent, constrained layouts, stable dimensions, accessible labels, and designed empty/loading/error states. Follow docs/DESIGN_REFERENCES.md: product proof over marketing fluff, no generic SaaS patterns, no nested cards. Show me the change in the running app when done.

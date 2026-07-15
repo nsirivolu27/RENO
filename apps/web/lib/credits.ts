@@ -1,54 +1,80 @@
-import { cookies } from "next/headers";
 import { randomUUID } from "node:crypto";
+import type { NextRequest, NextResponse } from "next/server";
 
-const COOKIE_NAME = "reno_visitor";
-const balances = new Map<string, number>();
+/**
+ * Freemium credits stub (hosted mode).
+ *
+ * Anonymous visitors are identified by an httpOnly cookie and get
+ * FREE_CREDITS renders against the server's provider keys. BYO-key renders
+ * never touch this module's balances.
+ *
+ * Production path (intentionally not built yet):
+ * - Replace the in-memory Map with Supabase/Postgres `profiles.credits`.
+ * - Add auth; on sign-up, merge the anonymous cookie's remaining credits
+ *   into the new profile, then retire the cookie balance.
+ * - A Stripe webhook (checkout.session.completed) increments
+ *   `profiles.credits` for purchased packs ($9 / 30 renders).
+ * - Keep spend-after-success semantics: only decrement once a provider
+ *   generation actually returns an image.
+ */
+
+export const VISITOR_COOKIE = "reno_visitor";
 
 function freeCredits(): number {
-  const parsed = Number.parseInt(process.env.FREE_CREDITS ?? "3", 10);
-  return Number.isFinite(parsed) ? parsed : 3;
+  const parsed = Number(process.env.FREE_CREDITS);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 3;
 }
 
-export async function getVisitorId(): Promise<string> {
-  const store = await cookies();
-  const existing = store.get(COOKIE_NAME)?.value;
-  if (existing) {
-    return existing;
-  }
+// Survives dev-server hot reloads; resets on process restart (fine for a stub).
+const globalScope = globalThis as typeof globalThis & {
+  __renoCredits?: Map<string, number>;
+};
+const balances: Map<string, number> = globalScope.__renoCredits ?? new Map();
+globalScope.__renoCredits = balances;
 
-  const id = randomUUID();
-  store.set(COOKIE_NAME, id, {
+export interface VisitorIdentity {
+  id: string;
+  isNew: boolean;
+}
+
+export function resolveVisitorId(req: NextRequest): VisitorIdentity {
+  const existing = req.cookies.get(VISITOR_COOKIE)?.value;
+  if (existing) {
+    return { id: existing, isNew: false };
+  }
+  return { id: randomUUID(), isNew: true };
+}
+
+export function attachVisitorCookie(res: NextResponse, id: string): void {
+  res.cookies.set(VISITOR_COOKIE, id, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24 * 365
+    maxAge: 60 * 60 * 24 * 365,
   });
-  balances.set(id, freeCredits());
-  return id;
 }
 
-export async function getCredits(): Promise<number> {
-  const id = await getVisitorId();
-  if (!balances.has(id)) {
-    balances.set(id, freeCredits());
-  }
-  return balances.get(id) ?? 0;
+export function getRemainingCredits(visitorId: string): number {
+  return balances.get(visitorId) ?? freeCredits();
 }
 
-export async function spendCredit(): Promise<number> {
-  const id = await getVisitorId();
-  const current = await getCredits();
-  if (current <= 0) {
-    return 0;
-  }
-  const next = current - 1;
-  balances.set(id, next);
+/** Spend one credit AFTER a successful generation. Returns the new balance. */
+export function spendCredit(visitorId: string): number {
+  const next = Math.max(0, getRemainingCredits(visitorId) - 1);
+  balances.set(visitorId, next);
   return next;
 }
 
-// Production upgrade path:
-// Replace this in-memory Map with a Supabase/Postgres table keyed by authenticated user id.
-// Keep anonymous cookie credits in a temporary table or signed cookie, add auth, and merge
-// remaining anonymous credits into profiles.credits on signup. Stripe webhooks should
-// increment profiles.credits after successful checkout or subscription renewal.
+/** Server-side provider key for hosted mode, if configured. */
+export function serverKeyFor(providerId: string): string {
+  switch (providerId) {
+    case "gemini":
+      return process.env.GEMINI_API_KEY ?? "";
+    case "openai":
+      return process.env.OPENAI_API_KEY ?? "";
+    case "replicate":
+      return process.env.REPLICATE_API_TOKEN ?? "";
+    default:
+      return "";
+  }
+}

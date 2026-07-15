@@ -1,12 +1,1 @@
-Pressure test this startup/product idea: $ARGUMENTS
-
-Output:
-
-- Core assumption that must be true.
-- Three most likely reasons this specific idea fails.
-- Whether the problem is urgent pain or a nice-to-have.
-- Early adopter profile.
-- Founder-market fit questions.
-- Direct verdict: strong, weak, or pivot required.
-
-Avoid generic startup advice. Every flaw must be specific to the idea.
+Pressure-test Reno end to end like a hostile QA engineer. Try: invalid/huge/non-image uploads, empty and whitespace inputs, unknown providers, missing keys, exhausted credits, corrupt project JSON imports, full localStorage, deleted-project deep links, and printing an empty project. For each: expected vs actual, severity, and the fix. The bar is docs/PRODUCT_PLAN.md's definition of done.

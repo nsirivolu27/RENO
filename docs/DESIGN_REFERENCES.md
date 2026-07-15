@@ -1,26 +1,26 @@
-# Design References
+# Reno — Design References
 
-## Video-125.mp4 Takeaways
+## The core principle: prove the product is real
 
-This reference is useful as a product-design reminder, not as a visual asset to copy.
+Avoid generic "vibe-coded" feature sections — the interchangeable three-icon-card rows, oversized gradient heroes, and marketing fluff that could describe any AI SaaS. Reno's landing and marketing surfaces must show **evidence**:
 
-Core lesson: avoid generic "vibe-coded" app sections. Reno should prove the product is real with concrete output.
+- Actual before/after render comparisons (real Studio output once available; honest illustrative previews until then — clearly the same room, same architecture, different design).
+- The real Studio and project workflow, shown as the concrete steps a professional takes.
+- Concrete numbers: "3 free renders", "10 design styles", "client demo projects" — not "blazing fast" or "AI-powered magic".
+- Client-demo previews that look like something you'd actually put in front of a client.
 
-Apply this to Reno:
+Do not copy any external reference assets. No stock screenshots, no borrowed mockups, no traced layouts.
 
-- Prefer actual before/after renders over generic feature icons.
-- Replace static "three feature cards" with a real Studio screenshot, a short demo clip, or a project-demo preview when available.
-- Show concrete outcomes: number of concepts in a project, favorite selections, client-demo export, and before/after comparison.
-- Keep landing-page claims tied to visible proof from the app.
-- Use the demo project view as a client-facing proof artifact: printable, shareable, and visually inspectable.
-- Do not copy characters, game footage, captions, or visual assets from the reference.
+## Visual language
 
-Best next landing-page improvement:
+- Dark theme, restrained and product-focused. Background near-black blue-grey (#0f1115), single warm accent (#ff7849) used sparingly — the "no" in the logo, primary actions, active states.
+- No purple gradients, no glassmorphism, no nested cards inside cards.
+- Constrained max-width layouts (~1080px), generous whitespace, stable dimensions so nothing jumps as content loads.
+- Typography: system UI stack, tight headings, dim secondary text (#99a1b3).
 
-Show a real Reno workflow band:
+## Interaction quality bar
 
-1. Upload a space.
-2. Generate before/after concepts.
-3. Save the best concepts into a client demo project.
-
-Use screenshots or generated sample renders once the render pipeline is verified with a real key.
+- The before/after slider is the hero interaction — it must feel immediate and work with mouse, touch, and keyboard.
+- Every async surface has designed empty, loading, and error states; errors say what to do next.
+- The homeowner flow never shows professional machinery unless a project is explicitly active.
+- Print output of a demo view is a deliverable, not an afterthought: white background, no chrome, unbroken render cards, final "after" images.
