@@ -24,3 +24,13 @@ Do not copy any external reference assets. No stock screenshots, no borrowed moc
 - Every async surface has designed empty, loading, and error states; errors say what to do next.
 - The homeowner flow never shows professional machinery unless a project is explicitly active.
 - Print output of a demo view is a deliverable, not an afterthought: white background, no chrome, unbroken render cards, final "after" images.
+
+## Video-111 notes: avoid the "AI slop" read
+
+The reference frames push the same product lesson from a go-to-market angle:
+
+- Lead with a crisp outcome, not "AI app" language. For Reno: "Turn one room photo into a client-ready renovation concept" is stronger than generic "AI redesign tool."
+- Show the workflow that replaces an existing messy process. For renovators, that means replacing loose screenshots, mood boards, and long back-and-forth texts with a project, saved concepts, favorites, and a printable/shareable demo.
+- Use early-access/founding-partner language when talking to professionals. It should feel like Reno is onboarding a small group of renovators/designers to shape the product, not blasting vague SaaS copy.
+- The landing page should show proof surfaces: uploaded photo, generated render, before/after comparison, project context, and demo/share output. Avoid big claims without UI evidence.
+- If using short-form video style later, use direct overlays and obvious product screenshots, but do not obscure the actual interface with decorative presenter cutouts.

@@ -26,9 +26,11 @@ Breaking mode 2 is a product regression, full stop.
 
 ## Current MVP features
 
-- Studio: drag-drop upload, room select, restyle/renovate toggle, 10-style grid, notes, provider dropdown (Gemini / OpenAI / Replicate), BYO key input, credits badge, before/after slider, download, regenerate.
+- Studio: drag-drop upload, room/space select (residential + corporate), restyle/renovate toggle, 10-style grid, notes, provider dropdown (Demo / Gemini / OpenAI / Replicate), BYO key input, credits badge, before/after slider, download, regenerate, and a "Use Demo provider" fallback when a real provider has no key or hits quota.
+- Demo provider: a built-in, no-key provider that returns a clearly-labeled SVG concept board (never presented as real AI output). It's the default so the whole flow can be demoed with zero paid services.
 - Demo projects (local-first, in localStorage): create with client name/room/notes/preferred styles/design direction; renders saved with compressed before/after images; favorite toggles; JSON export/import; print-friendly demo view for client proposals.
-- API: `GET /api/generate` (credits + provider availability), `POST /api/generate` (validation, provider resolution, key resolution, credit semantics).
+- Public sharing: from a project's Demo View, publish a server-side snapshot and get a public `/r/:shareId` page (favorites first, before/after, "Made with Reno"). Update or disable the share anytime.
+- API: `GET /api/generate` (credits + provider availability), `POST /api/generate` (validation, provider resolution, key resolution, credit semantics); plus the server project/share APIs (see `docs/BACKEND.md`).
 - Mobile prototype: camera/library capture, room/style chips, optional Gemini key, generate against the web API, tap to flip before/after.
 
 ## Business logic
@@ -46,9 +48,8 @@ Breaking mode 2 is a product regression, full stop.
 
 ## Future product layers (explicitly not built yet)
 
-- Auth + Supabase persistence (projects sync across devices; anonymous credit merge on signup).
+- Auth + Supabase persistence (projects sync across devices; anonymous credit merge on signup). Public shares currently publish a server snapshot scoped to the `reno_visitor` cookie, not an authenticated account.
 - Stripe checkout + webhook credit top-ups.
-- Public share pages for demo projects.
 - Watermarked free renders.
 - Batch concept generation ("3 concepts at once") — today, multiple concepts = generate → save → repeat.
 - Team workspaces for staging companies.

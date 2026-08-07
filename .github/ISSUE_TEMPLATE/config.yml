@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Product definition
+    url: https://github.com/nsirivolu27/RENO/blob/main/docs/PRODUCT.md
+    about: What Reno is and who it serves. Read before proposing product changes.
+  - name: Provider / API key problems
+    url: https://github.com/nsirivolu27/RENO/blob/main/docs/PROVIDERS.md
+    about: Quota, billing, and key errors (including the Gemini 0-quota case).
