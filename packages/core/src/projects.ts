@@ -16,6 +16,38 @@ export interface ProjectRender {
   createdAt: string;
 }
 
+/**
+ * Pointer from a local-first project to a server-published public share.
+ * Present only after the user creates a public share; a local-only project
+ * leaves this undefined.
+ */
+export interface ProjectShareLink {
+  /** Public share id used in `/r/:shareId`. */
+  shareId: string;
+  /** Relative public URL, e.g. `/r/<shareId>`. */
+  url: string;
+  /** Id of the server-side project copy backing this share. */
+  serverProjectId: string;
+  /** ISO timestamp of when the snapshot was published. */
+  sharedAt: string;
+}
+
+/**
+ * Optional business details printed on the client proposal cover page.
+ * Stored per project so a contractor can present different clients (or
+ * trading names) without a separate global settings store.
+ */
+export interface ProposalDetails {
+  /** Your company / trading name, e.g. "Novak Renovations". */
+  businessName?: string;
+  /** Person presenting, e.g. "Prepared by Nihal S.". */
+  preparedBy?: string;
+  /** Email, phone, or site shown under the business name. */
+  contact?: string;
+  /** Short scope/intro paragraph for the cover page. */
+  intro?: string;
+}
+
 /** A local-first client demo project for professionals. */
 export interface DemoProject {
   id: string;
@@ -29,6 +61,10 @@ export interface DemoProject {
   renders: ProjectRender[];
   createdAt: string;
   updatedAt: string;
+  /** Set when a public server-side share has been published for this project. */
+  share?: ProjectShareLink;
+  /** Optional branding/scope shown on the printed client proposal. */
+  proposal?: ProposalDetails;
 }
 
 export interface CreateDemoProjectInput {

@@ -71,6 +71,7 @@ export const STYLES: StylePreset[] = [
 ];
 
 export const ROOMS: string[] = [
+  // Residential
   "living room",
   "bedroom",
   "kitchen",
@@ -81,6 +82,12 @@ export const ROOMS: string[] = [
   "backyard/patio",
   "garage",
   "basement",
+  // Corporate / commercial
+  "office lobby",
+  "conference room",
+  "retail space",
+  "restaurant/cafe",
+  "hotel room",
 ];
 
 export function getStyle(id: string): StylePreset | undefined {
@@ -119,6 +126,12 @@ export function buildPrompt(req: GenerateRequest): string {
   if (notes) {
     parts.push(`Additional direction: ${notes}`);
   }
+
+  // Output-quality constraints. Client-facing renders should never contain
+  // people, captions, or provider watermarks.
+  parts.push(
+    "No people, no text, no labels, no logos, and no watermarks anywhere in the image. Realistic materials, correct scale, and natural balanced lighting."
+  );
 
   parts.push(ARCHITECTURE_LOCK);
   return parts.join(" ");

@@ -88,7 +88,8 @@ function Studio() {
         setProviderId(
           valid && saved
             ? saved
-            : (data.providers.find((p) => p.configured)?.id ??
+            : (data.providers.find((p) => p.id === "demo")?.id ??
+                data.providers.find((p) => p.configured)?.id ??
                 data.providers[0]?.id ??
                 "gemini")
         );
@@ -160,11 +161,15 @@ function Studio() {
     e.target.value = "";
   };
 
-  const generate = async () => {
+  const generate = async (overrideProvider?: string) => {
     if (!image) {
       setError("Upload a photo of your space first.");
       return;
     }
+    const useProvider = overrideProvider ?? providerId;
+    if (overrideProvider) persistProvider(overrideProvider);
+    // The demo provider ignores keys; don't forward a BYO key when falling back.
+    const useKey = useProvider === "demo" ? "" : apiKey.trim();
     setLoading(true);
     setError(null);
     setSaveState("idle");
@@ -189,8 +194,8 @@ function Studio() {
           room,
           mode,
           notes: combinedNotes || undefined,
-          provider: providerId || undefined,
-          apiKey: apiKey.trim() || undefined,
+          provider: useProvider || undefined,
+          apiKey: useKey || undefined,
         }),
       });
       const data = (await res.json()) as {
@@ -207,7 +212,7 @@ function Studio() {
       }
       setResult({
         image: data.image,
-        provider: data.provider ?? providerId,
+        provider: data.provider ?? useProvider,
         model: data.model ?? "",
       });
     } catch {
@@ -244,12 +249,25 @@ function Studio() {
   };
 
   const usingByoKey = apiKey.trim().length > 0;
+  const usingDemoProvider = providerId === "demo";
+  const selectedProviderInfo = providers.find((p) => p.id === providerId);
+  // A real provider is selected, but there's no server key and no BYO key.
+  const realProviderNeedsKey =
+    !usingDemoProvider &&
+    !usingByoKey &&
+    selectedProviderInfo !== undefined &&
+    !selectedProviderInfo.configured;
   const activeStyle = STYLES.find((s) => s.id === styleId);
   const creditsLabel = usingByoKey
-    ? "Your key · unlimited"
+    ? "Your key - unlimited"
+    : usingDemoProvider
+      ? "Demo provider - no credits"
     : credits === null
-      ? "…"
+      ? "..."
       : `${credits} free render${credits === 1 ? "" : "s"} left`;
+  const downloadExt = result?.image.startsWith("data:image/svg+xml")
+    ? "svg"
+    : "png";
 
   return (
     <div className="container">
@@ -261,7 +279,7 @@ function Studio() {
           </p>
         </div>
         <span className="badge" aria-live="polite">
-          {usingByoKey ? "🔑" : "✦"} <strong>{creditsLabel}</strong>
+          <strong>{creditsLabel}</strong>
         </span>
       </div>
 
@@ -276,11 +294,11 @@ function Studio() {
                 value={activeProjectId}
                 onChange={(e) => setActiveProjectId(e.target.value)}
               >
-                <option value="">No project — quick render</option>
+                <option value="">No project - quick render</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
-                    {p.clientName ? ` — ${p.clientName}` : ""}
+                    {p.clientName ? ` - ${p.clientName}` : ""}
                   </option>
                 ))}
               </select>
@@ -292,7 +310,7 @@ function Studio() {
               <p className="ctx-title">
                 {activeProject.name}
                 {activeProject.clientName
-                  ? ` · ${activeProject.clientName}`
+                  ? ` - ${activeProject.clientName}`
                   : ""}
               </p>
               {activeProject.designDirection && (
@@ -305,7 +323,7 @@ function Studio() {
                   href={`/projects/${activeProject.id}`}
                   style={{ color: "var(--accent)" }}
                 >
-                  Open Demo View →
+                  Open Demo View
                 </Link>
               </p>
             </div>
@@ -440,10 +458,27 @@ function Studio() {
               {providers.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} ({p.model})
-                  {p.configured ? "" : " — needs your key"}
+                  {p.id === "demo"
+                    ? " - no key, placeholder"
+                    : p.configured
+                      ? ""
+                      : " - needs your key"}
                 </option>
               ))}
             </select>
+            {usingDemoProvider && (
+              <span className="hint">
+                Demo provider returns a local placeholder render only. Choose
+                Gemini, OpenAI, or Replicate for real photoreal AI output.
+              </span>
+            )}
+            {realProviderNeedsKey && (
+              <span className="hint">
+                {selectedProviderInfo?.name} has no server key configured. Paste
+                your own key below, or switch back to the Demo provider to
+                preview the flow without a key.
+              </span>
+            )}
           </div>
 
           <div className="field">
@@ -452,7 +487,7 @@ function Studio() {
               id="key-input"
               type="password"
               autoComplete="off"
-              placeholder="Bring your own key — free, unlimited"
+              placeholder="Bring your own key - free, unlimited"
               value={apiKey}
               onChange={(e) => persistKey(e.target.value)}
             />
@@ -466,15 +501,26 @@ function Studio() {
             type="button"
             className="btn btn-primary"
             style={{ width: "100%" }}
-            onClick={generate}
+            onClick={() => generate()}
             disabled={loading || !image}
           >
-            {loading ? "Generating…" : result ? "Regenerate" : "Generate redesign"}
+            {loading ? "Generating..." : result ? "Regenerate" : "Generate redesign"}
           </button>
 
           {error && (
             <div className="alert alert-error" role="alert">
-              {error}
+              <div>{error}</div>
+              {!usingDemoProvider && image && (
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  style={{ marginTop: "0.6rem" }}
+                  onClick={() => generate("demo")}
+                  disabled={loading}
+                >
+                  Use Demo provider instead
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -485,8 +531,8 @@ function Studio() {
             <div className="canvas-placeholder loading" aria-live="polite">
               <span>
                 <span className="spinner" aria-hidden="true" />
-                Rendering your {room} in {activeStyle?.name ?? styleId}…
-                usually 10–30 seconds.
+                Rendering your {room} in {activeStyle?.name ?? styleId}...
+                usually 10-30 seconds.
               </span>
             </div>
           ) : result && image ? (
@@ -496,21 +542,21 @@ function Studio() {
                 <span className="badge">{activeStyle?.name ?? styleId}</span>
                 <span className="badge">{mode}</span>
                 <span className="badge">
-                  {result.provider} · {result.model}
+                  {result.provider} - {result.model}
                 </span>
               </div>
               <div className="result-actions">
                 <a
                   className="btn"
                   href={result.image}
-                  download={`reno-${room.replace(/[^a-z0-9]+/gi, "-")}-${styleId}.png`}
+                  download={`reno-${room.replace(/[^a-z0-9]+/gi, "-")}-${styleId}.${downloadExt}`}
                 >
                   Download render
                 </a>
                 <button
                   type="button"
                   className="btn"
-                  onClick={generate}
+                  onClick={() => generate()}
                   disabled={loading}
                 >
                   Regenerate
@@ -523,9 +569,9 @@ function Studio() {
                     disabled={saveState === "saving"}
                   >
                     {saveState === "saving"
-                      ? "Saving…"
+                      ? "Saving..."
                       : saveState === "saved"
-                        ? "Saved ✓"
+                        ? "Saved"
                         : "Save to project"}
                   </button>
                 )}
@@ -545,7 +591,7 @@ function Studio() {
           ) : image ? (
             <div className="canvas-placeholder">
               <span>
-                Ready — pick a style and hit <b>Generate redesign</b>.
+                Ready - pick a style and hit <b>Generate redesign</b>.
               </span>
             </div>
           ) : (
@@ -561,7 +607,7 @@ function Studio() {
 
 export default function StudioPage() {
   return (
-    <Suspense fallback={<div className="container">Loading Studio…</div>}>
+    <Suspense fallback={<div className="container">Loading Studio...</div>}>
       <Studio />
     </Suspense>
   );

@@ -861,6 +861,23 @@ p {
   color: var(--text-dim);
 }
 
+.share-kicker {
+  display: inline-flex;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0.22rem 0.7rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.public-share .render-gallery {
+  margin-top: 1rem;
+}
+
 .render-gallery {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1050,4 +1067,405 @@ p {
 .dropzone:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ---------- Public share controls + share page ---------- */
+
+.share-panel {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+}
+
+.share-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.share-panel-head strong {
+  font-size: 0.98rem;
+}
+
+.share-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+}
+
+.share-status.on {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+.share-link-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0.6rem 0;
+}
+
+.share-link-row input {
+  flex: 1 1 260px;
+  min-width: 0;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 0.5rem 0.7rem;
+  font-size: 0.9rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.share-footer {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.share-footer-sub {
+  font-size: 0.8rem;
+}
+
+.logo-inline {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.logo-inline span {
+  color: var(--accent);
+}
+
+.share-kicker {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+/* ---------- Client proposal (screen controls) ---------- */
+
+.proposal-panel {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+}
+
+.proposal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.proposal-form {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Cover page is print-only. */
+.print-cover {
+  display: none;
+}
+
+/* ---------- Print: client proposal PDF ---------- */
+
+@media print {
+  .print-cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 92vh;
+    page-break-after: always;
+    break-after: page;
+    padding: 0.5in 0;
+  }
+
+  .print-cover-top {
+    border-bottom: 2px solid #111111;
+    padding-bottom: 0.6rem;
+  }
+
+  .print-business {
+    font-size: 20pt;
+    font-weight: 800;
+    color: #111111;
+  }
+
+  .print-doc-type {
+    font-size: 10pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #555555;
+    margin-top: 0.15rem;
+  }
+
+  .print-cover-main h1 {
+    font-size: 30pt;
+    margin: 0 0 0.4rem;
+    color: #111111;
+  }
+
+  .print-client {
+    font-size: 14pt;
+    color: #333333;
+    margin: 0 0 0.2rem;
+  }
+
+  .print-room {
+    font-size: 11pt;
+    color: #555555;
+    text-transform: capitalize;
+    margin: 0 0 1rem;
+  }
+
+  .print-intro,
+  .print-direction {
+    font-size: 11pt;
+    color: #222222;
+    max-width: 6.2in;
+    margin: 0 0 0.5rem;
+  }
+
+  .print-cover-foot {
+    font-size: 10pt;
+    color: #444444;
+    border-top: 1px solid #cccccc;
+    padding-top: 0.6rem;
+  }
+
+  /* Favorites-only proposal: drop the rest of the gallery. */
+  .print-favorites-only .render-card:not(.is-favorite) {
+    display: none !important;
+  }
+
+  /* One concept per page keeps captions with their image. */
+  .render-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 0.4in;
+  }
+}
+
+/* ===========================================================
+   Editorial layer — makes client-facing pages read like a
+   design studio document rather than a generic AI dashboard.
+   System fonts only; no webfont dependency.
+   =========================================================== */
+
+:root {
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    ui-serif, serif;
+  --rule: rgba(255, 255, 255, 0.08);
+}
+
+/* Display type for document titles (not the wordmark, which stays geometric). */
+.demo-header h1,
+.public-share h1,
+.section > h2,
+.concept-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.public-share h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  line-height: 1.15;
+  margin-bottom: 0.35rem;
+}
+
+.public-share .demo-header {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 2.25rem;
+}
+
+.public-share .meta {
+  font-size: 0.95rem;
+}
+
+.share-kicker {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+}
+
+/* ---- Concept cards (client-facing) ---- */
+
+.render-card.concept {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding-top: 0.25rem;
+}
+
+.concept-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.concept-index {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.concept-flag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.render-card.concept .ba-slider {
+  border-radius: 2px;
+  border-color: var(--rule);
+}
+
+.render-card.concept .render-body {
+  padding: 0.9rem 0 0;
+}
+
+.concept-title {
+  font-size: 1.25rem;
+  margin: 0 0 0.6rem;
+}
+
+/* Spec list: label/value pairs instead of pill soup. */
+.spec-list {
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.spec-list > div {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.spec-list dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.spec-list dd {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.render-card.concept .render-notes {
+  margin-top: 0.7rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+  max-width: 46ch;
+}
+
+.public-share .render-gallery {
+  gap: 2.5rem 2rem;
+}
+
+.public-share .share-footer {
+  margin-top: 3rem;
+}
+
+/* ---- Print: carry the editorial styling into the PDF ---- */
+
+@media print {
+  .concept-head {
+    border-bottom: 1px solid #cccccc;
+  }
+
+  .concept-index,
+  .spec-list dt {
+    color: #666666;
+  }
+
+  .concept-flag {
+    color: #111111;
+  }
+
+  .spec-list > div {
+    border-bottom: 1px solid #e2e2e2;
+  }
+
+  .concept-title {
+    font-size: 15pt;
+  }
+}
+
+/* Provider/model provenance — useful internally, never on the client PDF. */
+.render-provenance {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  opacity: 0.75;
+}
+
+/* Print-only flag (screen uses the interactive button instead). */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: inline;
+  }
 }

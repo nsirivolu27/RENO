@@ -68,6 +68,8 @@ export function spendCredit(visitorId: string): number {
 /** Server-side provider key for hosted mode, if configured. */
 export function serverKeyFor(providerId: string): string {
   switch (providerId) {
+    case "demo":
+      return "demo";
     case "gemini":
       return process.env.GEMINI_API_KEY ?? "";
     case "openai":

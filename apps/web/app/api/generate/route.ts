@@ -1,6 +1,12 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { buildPrompt, dataUrlParts, getProvider, providers } from "@reno/core";
+import {
+  buildPrompt,
+  classifyProviderFailure,
+  dataUrlParts,
+  getProvider,
+  providers,
+} from "@reno/core";
 import type { GenerateMode, GenerateRequest } from "@reno/core";
 import {
   attachVisitorCookie,
@@ -24,7 +30,7 @@ export async function GET(req: NextRequest) {
       id: p.id,
       name: p.name,
       model: p.model,
-      configured: Boolean(serverKeyFor(p.id)),
+      configured: p.id === "demo" || Boolean(serverKeyFor(p.id)),
     })),
   });
   if (isNew) attachVisitorCookie(res, id);
@@ -100,14 +106,15 @@ export async function POST(req: NextRequest) {
   const byoKey = asString(body.apiKey);
   const serverKey = serverKeyFor(provider.id);
   const apiKey = byoKey || serverKey;
-  if (!apiKey) {
+  const usingDemoProvider = provider.id === "demo";
+  if (!apiKey && !usingDemoProvider) {
     return respond(400, {
       error: `No API key available for ${provider.name}. Paste your own key in Studio, or configure the server.`,
       code: "NO_API_KEY",
     });
   }
 
-  const usingServerKey = !byoKey;
+  const usingServerKey = !byoKey && !usingDemoProvider;
   if (usingServerKey && getRemainingCredits(visitorId) <= 0) {
     return respond(402, {
       error:
@@ -128,16 +135,22 @@ export async function POST(req: NextRequest) {
   const prompt = buildPrompt(request);
 
   try {
-    const result = await provider.generate(request, prompt, apiKey);
+    const result = await provider.generate(request, prompt, apiKey || "demo");
     // Spend AFTER success only. BYO-key renders never spend hosted credits.
     const credits = usingServerKey
       ? spendCredit(visitorId)
       : getRemainingCredits(visitorId);
     return respond(200, { ...result, credits });
   } catch (err) {
+    const raw = err instanceof Error ? err.message : "Generation failed.";
+    const failure = classifyProviderFailure(provider.id, raw);
     return respond(502, {
-      error: err instanceof Error ? err.message : "Generation failed.",
+      error: failure.message,
       code: "PROVIDER_ERROR",
+      // Machine-readable reason so the UI can suggest the right recovery.
+      reason: failure.kind,
+      // Keep the provider's own words available for debugging.
+      detail: raw,
       credits: getRemainingCredits(visitorId),
     });
   }

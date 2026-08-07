@@ -13,9 +13,17 @@ export { STYLES, ROOMS, getStyle, buildPrompt, ARCHITECTURE_LOCK } from "./style
 export type {
   ProjectRender,
   DemoProject,
+  ProjectShareLink,
+  ProposalDetails,
   CreateDemoProjectInput,
   CreateProjectRenderInput,
 } from "./projects";
 export { createDemoProject, createProjectRender } from "./projects";
+
+export type { ProviderFailure, ProviderFailureKind } from "./providerErrors";
+export {
+  classifyProviderFailure,
+  friendlyProviderMessage,
+} from "./providerErrors";
 
 export { providers, getProvider } from "./providers/index";

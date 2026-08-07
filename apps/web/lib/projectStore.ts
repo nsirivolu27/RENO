@@ -3,6 +3,8 @@ import type {
   CreateProjectRenderInput,
   DemoProject,
   ProjectRender,
+  ProjectShareLink,
+  ProposalDetails,
 } from "@reno/core";
 import { createDemoProject, createProjectRender } from "@reno/core";
 
@@ -23,6 +25,15 @@ export interface ProjectStore {
   ): Promise<ProjectRender>;
   toggleFavorite(projectId: string, renderId: string): Promise<DemoProject>;
   remove(projectId: string): Promise<void>;
+  /** Attach a published server share pointer to a local project. */
+  setShare(projectId: string, share: ProjectShareLink): Promise<DemoProject>;
+  /** Remove the share pointer (after disabling the server share). */
+  clearShare(projectId: string): Promise<DemoProject>;
+  /** Save the proposal branding/scope used on the printed client PDF. */
+  setProposal(
+    projectId: string,
+    proposal: ProposalDetails
+  ): Promise<DemoProject>;
 }
 
 const STORAGE_KEY = "reno_projects";
@@ -141,7 +152,50 @@ export const localProjectStore: ProjectStore = {
   async remove(projectId) {
     writeAll(readAll().filter((p) => p.id !== projectId));
   },
+
+  async setShare(projectId, share) {
+    const all = readAll();
+    const project = mustFind(all, projectId);
+    project.share = share;
+    project.updatedAt = new Date().toISOString();
+    writeAll(all);
+    return project;
+  },
+
+  async clearShare(projectId) {
+    const all = readAll();
+    const project = mustFind(all, projectId);
+    delete project.share;
+    project.updatedAt = new Date().toISOString();
+    writeAll(all);
+    return project;
+  },
+
+  async setProposal(projectId, proposal) {
+    const all = readAll();
+    const project = mustFind(all, projectId);
+    const trimmed: ProposalDetails = {};
+    if (proposal.businessName?.trim()) trimmed.businessName = proposal.businessName.trim();
+    if (proposal.preparedBy?.trim()) trimmed.preparedBy = proposal.preparedBy.trim();
+    if (proposal.contact?.trim()) trimmed.contact = proposal.contact.trim();
+    if (proposal.intro?.trim()) trimmed.intro = proposal.intro.trim();
+    project.proposal = trimmed;
+    project.updatedAt = new Date().toISOString();
+    writeAll(all);
+    return project;
+  },
 };
+
+/**
+ * Most recently used proposal branding, so a contractor doesn't retype their
+ * business details on every new client project.
+ */
+export async function lastUsedProposal(): Promise<ProposalDetails | null> {
+  const withProposal = readAll()
+    .filter((p) => p.proposal && Object.keys(p.proposal).length > 0)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return withProposal[0]?.proposal ?? null;
+}
 
 /**
  * Compresses a data-URL image before it goes into localStorage:
@@ -149,6 +203,7 @@ export const localProjectStore: ProjectStore = {
  */
 export async function compressProjectImage(dataUrl: string): Promise<string> {
   if (typeof document === "undefined") return dataUrl;
+  if (dataUrl.startsWith("data:image/svg+xml")) return dataUrl;
 
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const el = new Image();

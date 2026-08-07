@@ -39,8 +39,11 @@ export interface DataUrlParts {
   base64: string;
 }
 
+// svg+xml is accepted because the built-in Demo provider returns an SVG concept
+// board as a data URL. SVGs are only ever rendered inside <img>, which does not
+// execute embedded scripts, so this is safe for our display/storage use.
 const DATA_URL_RE =
-  /^data:(image\/(?:png|jpe?g|webp|heic|heif));base64,([A-Za-z0-9+/]+={0,2})$/;
+  /^data:(image\/(?:png|jpe?g|webp|heic|heif|svg\+xml));base64,([A-Za-z0-9+/]+={0,2})$/;
 
 /**
  * Validates a base64 image data URL and splits it into its parts.
