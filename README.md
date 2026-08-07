@@ -85,10 +85,11 @@ Public project shares render at `/r/:shareId`, backed by the same server store a
 With a dev server running (`npm run dev`):
 
 ```bash
-npm run smoke:demo       # no-key Demo provider generate path
-npm run smoke:backend    # project/render/share happy path
-npm run smoke:negatives  # error paths: invalid body/image, 404s, limits
-npm run smoke            # backend + negatives together
+npm run smoke:demo         # no-key Demo provider generate path
+npm run smoke:backend      # project/render/share happy path
+npm run smoke:negatives    # error paths: invalid body/image, 404s, limits
+npm run smoke:marketplace  # catalog pricing, estimates, company portal, leads
+npm run smoke              # all of the above
 ```
 
 Point any of them at another origin with `RENO_SMOKE_BASE_URL`. To exercise the capacity limits quickly, start dev with small `RENO_MAX_PROJECTS_PER_VISITOR` / `RENO_MAX_RENDERS_PER_PROJECT` values.
@@ -113,6 +114,8 @@ Set env keys for hosted-style credits, or set nothing and let everyone use their
 
 ## Docs
 
+- `docs/CATALOG.md` — vendor pricing and how concept cost estimates are built
+- `docs/COMPANY_PORTAL.md` — company showcase pages and lead capture
 - `docs/DEPLOY.md` — hosting Reno so emailed client share links work
 - `docs/PROVIDERS.md` — getting real photoreal output (and fixing quota/key errors)
 - `docs/BACKEND.md` — server project/share APIs and storage

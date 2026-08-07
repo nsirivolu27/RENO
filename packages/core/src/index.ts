@@ -20,6 +20,44 @@ export type {
 } from "./projects";
 export { createDemoProject, createProjectRender } from "./projects";
 
+export type {
+  ItemCategory,
+  VendorKind,
+  Vendor,
+  CatalogItem,
+  BudgetTier,
+  EstimateLine,
+  CostEstimate,
+  EstimateInput,
+} from "./catalog";
+export {
+  ITEM_CATEGORIES,
+  BUDGET_TIERS,
+  estimateForConcept,
+  formatMoneyRange,
+  itemsByVendor,
+} from "./catalog";
+export { SAMPLE_VENDORS, SAMPLE_CATALOG } from "./catalogSeed";
+
+export type {
+  CompanyTrade,
+  CompanyProfile,
+  OfferingStatus,
+  Offering,
+  LeadStatus,
+  Lead,
+  CreateCompanyInput,
+  CreateOfferingInput,
+  CreateLeadInput,
+} from "./companies";
+export {
+  slugify,
+  createCompanyProfile,
+  createOffering,
+  createLead,
+  leadHasContact,
+} from "./companies";
+
 export type { ProviderFailure, ProviderFailureKind } from "./providerErrors";
 export {
   classifyProviderFailure,

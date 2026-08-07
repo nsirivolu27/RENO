@@ -11,6 +11,22 @@ Two generation modes:
 - **Restyle** — replaces furniture, decor, rugs, art, textiles, lighting, and accessories while preserving flooring, walls, fixtures, cabinetry, and built-ins.
 - **Renovate** — additionally changes flooring, walls, fixtures, cabinetry, finishes, and built-ins where appropriate.
 
+## The three surfaces
+
+1. **Studio (consumer app).** Upload a space, pick room/style/mode, generate a
+   redesign — now with an **indicative cost** from a vendor catalog, so the
+   answer to "what would this cost?" arrives with the picture.
+2. **Client demo projects (professional tool).** Save concepts, mark
+   recommendations, print a branded proposal, publish a client share link.
+3. **Company portal (lead generation).** Design, furniture and renovation
+   companies publish the work they can do at `/c/:slug`, backed by real
+   before/after visuals and pricing, and capture enquiries as leads.
+
+Surfaces 1 and 3 are two sides of the same market: consumers who want to see
+what's possible, and companies who want to be the ones who deliver it. The
+catalog is the connective tissue — it prices what surface 1 renders and sources
+what surface 3 sells. See `docs/CATALOG.md` and `docs/COMPANY_PORTAL.md`.
+
 ## The two audiences
 
 **Everyday users.** Homeowners, renters, office managers, real-estate people, and small business owners who want to quickly see what a space could look like. Their flow must stay simple: upload → pick room and style → generate → compare → download. No project machinery in the way.

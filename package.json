@@ -17,7 +17,8 @@
     "smoke:demo": "node scripts/smoke-demo.mjs",
     "smoke:backend": "node scripts/smoke-backend.mjs",
     "smoke:negatives": "node scripts/smoke-negatives.mjs",
-    "smoke": "npm run smoke:demo && npm run smoke:backend && npm run smoke:negatives"
+    "smoke:marketplace": "node scripts/smoke-marketplace.mjs",
+    "smoke": "npm run smoke:demo && npm run smoke:backend && npm run smoke:negatives && npm run smoke:marketplace"
   },
   "devDependencies": {
     "react": "19.2.7",

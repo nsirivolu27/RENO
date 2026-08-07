@@ -14,6 +14,7 @@ import { useSearchParams } from "next/navigation";
 import { ROOMS, STYLES } from "@reno/core";
 import type { DemoProject, GenerateMode } from "@reno/core";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
+import CostEstimate from "@/components/CostEstimate";
 import { compressProjectImage, localProjectStore } from "@/lib/projectStore";
 
 const KEY_STORAGE = "reno_key";
@@ -576,6 +577,7 @@ function Studio() {
                   </button>
                 )}
               </div>
+              <CostEstimate room={room} style={styleId} mode={mode} />
               {saveState === "saved" && activeProject && (
                 <div className="alert alert-ok">
                   Saved to {activeProject.name}.{" "}

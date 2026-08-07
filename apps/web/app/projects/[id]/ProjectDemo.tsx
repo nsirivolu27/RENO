@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { STYLES } from "@reno/core";
 import type { DemoProject, ProposalDetails } from "@reno/core";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
+import CostEstimate from "@/components/CostEstimate";
 import { lastUsedProposal, localProjectStore } from "@/lib/projectStore";
 import { disableShare, publishShare, shareUrl } from "@/lib/shareClient";
 import { isLocalBaseUrl } from "@/lib/appUrl";
@@ -477,6 +478,7 @@ export default function ProjectDemo({ id }: { id: string }) {
                   </div>
                 </dl>
                 {r.notes && <p className="render-notes">{r.notes}</p>}
+                <CostEstimate room={project.room} style={r.style} mode={r.mode} />
                 <p className="render-provenance no-print">
                   {r.provider} · {r.model}
                 </p>

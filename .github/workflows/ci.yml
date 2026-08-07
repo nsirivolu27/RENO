@@ -58,6 +58,9 @@ jobs:
       - name: Smoke — error paths and limits
         run: npm run smoke:negatives
 
+      - name: Smoke — catalog pricing and company portal
+        run: npm run smoke:marketplace
+
       - name: Server log (on failure)
         if: failure()
         run: cat /tmp/reno-server.log || true
