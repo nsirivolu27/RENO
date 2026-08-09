@@ -3,14 +3,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import {
-  ArrowRight, Building2, ChevronDown, ChevronLeft, Download,
+  ArrowRight, Building2, ChevronDown, ChevronLeft, Download, ExternalLink,
   Heart, Layers3, LayoutDashboard, Menu, Palette, Plus, Search, Send, Sparkles, WandSparkles, Zap
 } from 'lucide-react';
 import { Link, Route, Switch, useLocation, useParams } from 'wouter';
 
 import { Pill } from '@/components/ui/pill';
 import { Studio } from '@/pages/Studio';
-import { Concept, SEED_CONCEPTS, getSavedConcepts, toggleFavoriteLocally } from '@/lib/concepts';
+import { Present } from '@/pages/Present';
+import { Concept, SEED_CONCEPTS, getAllConcepts, toggleFavoriteLocally, deleteConceptLocally, clearDemoConceptsLocally } from '@/lib/concepts';
 
 const queryClient = new QueryClient();
 
@@ -90,42 +91,66 @@ function Home() {
   </div>;
 }
 
-function ConceptCard({ concept, onFavorite }: { concept: Concept; onFavorite: (id: string) => void }) {
+function ConceptCard({ concept, onFavorite, onDelete }: { concept: Concept; onFavorite: (id: string) => void; onDelete: (id: string) => void }) {
   const bgStyle = concept.beforeImage ? { backgroundImage: `url(${concept.beforeImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {};
-  return <Link href={`/projects/${concept.id}`} className="group block overflow-hidden rounded-2xl border hairline bg-[hsl(var(--card))] transition-transform duration-300 hover:-translate-y-1 hover:border-[hsl(var(--primary)/.55)]" data-testid={`card-concept-${concept.id}`}>
-    <div className="relative aspect-[1.32/1] overflow-hidden">
+  return <div className="group block overflow-hidden rounded-2xl border hairline bg-[hsl(var(--card))] transition-transform duration-300 hover:-translate-y-1 hover:border-[hsl(var(--primary)/.55)]" data-testid={`card-concept-${concept.id}`}>
+    <Link href={`/projects/${concept.id}`} className="block relative aspect-[1.32/1] overflow-hidden">
       <div className={concept.image ? `room-image ${concept.image} absolute inset-0 transition-transform duration-500 group-hover:scale-105` : "absolute inset-0 transition-transform duration-500 group-hover:scale-105 bg-black/20"} style={bgStyle} />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
       <div className="absolute left-4 top-4"><Pill accent>{concept.room}</Pill></div>
-      <button onClick={e => { e.preventDefault(); onFavorite(concept.id); }} className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/25 text-white backdrop-blur-md" data-testid={`button-favorite-${concept.id}`}>
-        <Heart size={14} fill={concept.favorite ? 'currentColor' : 'none'} className={concept.favorite ? 'text-[#ecbf7d]' : ''} />
-      </button>
       <div className="absolute inset-x-4 bottom-4 flex items-center justify-between text-white drop-shadow-md">
         <span className="mono text-[10px] uppercase tracking-[.1em] font-medium">Concept {concept.id.replace('c-','')}</span>
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/25 backdrop-blur-md transition-transform group-hover:translate-x-1"><ArrowRight size={13} /></span>
       </div>
-    </div>
-    <div className="p-4">
-      <h3 className="serif text-[22px]">{concept.title}</h3>
+    </Link>
+    <div className="p-4 relative">
+      <button onClick={e => { e.preventDefault(); e.stopPropagation(); onFavorite(concept.id); }} className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border hairline bg-[hsl(var(--background))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]" data-testid={`button-favorite-${concept.id}`}>
+        <Heart size={14} fill={concept.favorite ? 'currentColor' : 'none'} className={concept.favorite ? 'text-[#ecbf7d]' : ''} />
+      </button>
+      <Link href={`/projects/${concept.id}`} className="block pr-10">
+        <h3 className="serif text-[22px] truncate">{concept.title}</h3>
+      </Link>
       <div className="mt-2 flex items-center justify-between text-xs muted">
-        <span>{concept.client}</span><span>{concept.style}</span>
+        <span className="truncate">{concept.client}</span><span className="shrink-0 ml-2">{concept.style}</span>
       </div>
+      {concept.rationale && (
+        <p className="mt-3 text-[11px] line-clamp-2 muted leading-relaxed">{concept.rationale}</p>
+      )}
       <div className="mt-4 flex items-center justify-between border-t hairline pt-3">
-        <span className="mono text-[10px] uppercase tracking-[.1em] muted">{concept.budget}</span>
+        <div className="flex items-center gap-2">
+           <Link href={`/present/${concept.id}`} className="text-[10px] font-semibold uppercase tracking-wider text-[hsl(var(--primary))] hover:underline" data-testid={`link-present-${concept.id}`}>Present</Link>
+           <span className="text-xs muted">·</span>
+           <button onClick={() => onDelete(concept.id)} className="text-[10px] uppercase tracking-wider text-red-400 hover:text-red-300 transition-colors" data-testid={`button-delete-${concept.id}`}>Delete</button>
+        </div>
         <span className="text-[11px] muted">{concept.date}</span>
       </div>
     </div>
-  </Link>;
+  </div>;
 }
 
-function Projects({ concepts, onFavorite }: { concepts: Concept[]; onFavorite: (id: string) => void }) {
+function Projects({ concepts, onFavorite, onDelete, onClearDemo }: { concepts: Concept[]; onFavorite: (id: string) => void; onDelete: (id: string) => void; onClearDemo: () => void }) {
   const [query, setQuery] = useState(''); const [filter, setFilter] = useState('All concepts');
   const filtered = concepts.filter(c => `${c.title} ${c.client} ${c.room}`.toLowerCase().includes(query.toLowerCase()) && (filter === 'All concepts' || (filter === 'Favorites' ? c.favorite : c.room === filter)));
+  
+  const handleClearDemo = () => {
+    if (confirm('Are you sure you want to clear all non-seed saved concepts?')) {
+      onClearDemo();
+    }
+  };
+  
   return <div className="mx-auto max-w-[1440px] px-5 py-12 md:px-10 md:py-16">
     <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><Pill>your library</Pill><h1 className="serif mt-4 text-6xl tracking-[-.05em]">Projects<span className="text-[hsl(var(--primary))]">.</span></h1><p className="mt-3 max-w-md text-sm leading-6 muted">A visual record of the rooms you’ve imagined, refined, and made ready to share.</p></div><Link href="/studio" className="btn-primary inline-flex w-fit items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold" data-testid="link-new-project"><Plus size={17} /> New concept</Link></div>
     <div className="mt-12 flex flex-col justify-between gap-4 border-y hairline py-4 md:flex-row"><div className="relative max-w-sm flex-1"><Search size={16} className="absolute left-3 top-2.5 muted" /><input value={query} onChange={e => setQuery(e.target.value)} className="input-dark w-full rounded-lg py-2 pl-9 pr-3 text-sm" placeholder="Search by project, client, or room" data-testid="input-search-projects" /></div><div className="mobile-scroll flex gap-2">{['All concepts','Favorites','Living room','Kitchen'].map(item => <button key={item} onClick={() => setFilter(item)} className={`whitespace-nowrap rounded-full border px-3 py-2 text-xs transition-colors ${filter === item ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary)/.1)] text-[hsl(var(--primary))]' : 'hairline muted hover:border-[hsl(var(--muted-foreground))]'}`} data-testid={`button-filter-${item.toLowerCase().replace(' ','-')}`}>{item}</button>)}</div></div>
-    <div className="mt-8 flex items-center justify-between"><p className="text-sm muted"><span className="text-[hsl(var(--foreground))]">{filtered.length}</span> saved directions</p><button className="flex items-center gap-1 text-xs muted" data-testid="button-sort-projects">Recently edited <ChevronDown size={13} /></button></div>
-    {filtered.length ? <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{filtered.map(c => <ConceptCard key={c.id} concept={c} onFavorite={onFavorite} />)}</div> : <div className="mt-5 rounded-2xl border border-dashed hairline py-20 text-center bg-[hsl(var(--card))]"><Palette className="mx-auto mb-4 text-[hsl(var(--primary))]" size={27} /><p className="serif text-2xl">Nothing in this direction yet.</p><p className="mt-2 text-sm muted">Try another search, or start a fresh concept.</p></div>}
+    <div className="mt-8 flex items-center justify-between">
+      <p className="text-sm muted"><span className="text-[hsl(var(--foreground))]">{filtered.length}</span> saved directions</p>
+      <div className="flex items-center gap-4">
+        {concepts.length > SEED_CONCEPTS.length && (
+           <button onClick={handleClearDemo} className="text-xs text-red-400 hover:text-red-300" data-testid="button-clear-demo">Clear demo concepts</button>
+        )}
+        <button className="flex items-center gap-1 text-xs muted" data-testid="button-sort-projects">Recently edited <ChevronDown size={13} /></button>
+      </div>
+    </div>
+    {filtered.length ? <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{filtered.map(c => <ConceptCard key={c.id} concept={c} onFavorite={onFavorite} onDelete={onDelete} />)}</div> : <div className="mt-5 rounded-2xl border border-dashed hairline py-20 text-center bg-[hsl(var(--card))]"><Palette className="mx-auto mb-4 text-[hsl(var(--primary))]" size={27} /><p className="serif text-2xl">Nothing in this direction yet.</p><p className="mt-2 text-sm muted">Try another search, or start a fresh concept.</p></div>}
   </div>;
 }
 
@@ -187,12 +212,22 @@ function ProjectDetail({ concepts }: { concepts: Concept[] }) {
         </dl>
         <div className="mt-6 rounded-xl border border-[hsl(var(--primary)/.25)] bg-[hsl(var(--primary)/.07)] p-5">
           <p className="mono text-[10px] uppercase tracking-[.12em] text-[hsl(var(--primary))]">Designer’s note</p>
-          <p className="serif mt-3 text-xl leading-snug">“A little less noise. More room for the morning light to do its work.”</p>
-          <p className="mt-4 text-xs leading-5 muted">A warm, livable direction that keeps the architectural bones and makes space for the people in it.</p>
+          <p className="serif mt-3 text-xl leading-snug">{concept.rationale}</p>
         </div>
         <div className="mt-6 flex gap-2">
-          <button onClick={() => window.print()} className="btn-primary flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-xs font-semibold" data-testid="button-download-proposal"><Download size={14} />Download PDF</button>
-          <button className="btn-ghost flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:text-[hsl(var(--primary))]" data-testid="button-share-proposal"><Send size={15} /></button>
+          <Link href={`/present/${concept.id}`} className="btn-primary flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-xs font-semibold" data-testid="button-present-proposal"><ExternalLink size={14} /> Open Presentation</Link>
+          <button onClick={() => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(concept, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `reno-concept-${concept.room.toLowerCase().replace(/\s+/g, '-')}.json`;
+            a.click();
+          }} className="btn-ghost flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:text-[hsl(var(--primary))]" data-testid="button-download-json"><Download size={15} /></button>
+          <button onClick={() => {
+             const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+             navigator.clipboard.writeText(`${window.location.origin}${baseUrl}present/${concept.id}`);
+             alert('Link copied to clipboard!');
+          }} className="btn-ghost flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:text-[hsl(var(--primary))]" data-testid="button-share-proposal"><Send size={15} /></button>
         </div>
       </aside>
     </div>
@@ -212,42 +247,61 @@ export default function App() {
   
   // Combine local storage and seeds
   useEffect(() => {
-     setConcepts([...getSavedConcepts(), ...SEED_CONCEPTS]);
+     setConcepts(getAllConcepts());
   }, []);
 
   const [, setLocation] = useLocation();
 
   // refresh concepts when path changes (e.g. after save in studio)
   useEffect(() => {
-     setConcepts([...getSavedConcepts(), ...SEED_CONCEPTS]);
+     setConcepts(getAllConcepts());
   }, [useLocation()[0]]);
 
   const handleFavorite = (id: string) => {
     toggleFavoriteLocally(id);
-    setConcepts([...getSavedConcepts(), ...SEED_CONCEPTS]);
+    setConcepts(getAllConcepts());
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this concept?')) {
+      deleteConceptLocally(id);
+      setConcepts(getAllConcepts());
+    }
+  };
+
+  const handleClearDemo = () => {
+    clearDemoConceptsLocally();
+    setConcepts(getAllConcepts());
   };
 
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
-        <Shell>
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/studio">
-              <Studio />
-            </Route>
-            <Route path="/projects">
-              <Projects concepts={concepts} onFavorite={handleFavorite} />
-            </Route>
-            <Route path="/projects/:id">
-              <ProjectDetail concepts={concepts} />
-            </Route>
-            <Route path="/for-companies" component={ForCompanies} />
-            <Route>
-              <div className="flex h-[70vh] flex-col items-center justify-center text-center"><h1 className="serif text-6xl">404</h1><p className="mt-4 muted">This room doesn't exist.</p><Link href="/" className="btn-primary mt-6 rounded-full px-5 py-3 text-sm font-semibold">Back to Overview</Link></div>
-            </Route>
-          </Switch>
-        </Shell>
+        <Switch>
+          <Route path="/present/:id">
+            <Present concepts={concepts} />
+          </Route>
+          <Route>
+            <Shell>
+              <Switch>
+                <Route path="/" component={Home} />
+                <Route path="/studio">
+                  <Studio />
+                </Route>
+                <Route path="/projects">
+                  <Projects concepts={concepts} onFavorite={handleFavorite} onDelete={handleDelete} onClearDemo={handleClearDemo} />
+                </Route>
+                <Route path="/projects/:id">
+                  <ProjectDetail concepts={concepts} />
+                </Route>
+                <Route path="/for-companies" component={ForCompanies} />
+                <Route>
+                  <div className="flex h-[70vh] flex-col items-center justify-center text-center"><h1 className="serif text-6xl">404</h1><p className="mt-4 muted">This room doesn't exist.</p><Link href="/" className="btn-primary mt-6 rounded-full px-5 py-3 text-sm font-semibold">Back to Overview</Link></div>
+                </Route>
+              </Switch>
+            </Shell>
+          </Route>
+        </Switch>
         <Toaster />
       </ErrorBoundary>
     </QueryClientProvider>

@@ -1,5 +1,5 @@
 import { useState, useRef, ChangeEvent } from 'react';
-import { ImagePlus, MoreHorizontal, Check, WandSparkles, Download, Bookmark, ExternalLink, Undo2 } from 'lucide-react';
+import { ImagePlus, MoreHorizontal, Check, WandSparkles, Bookmark, ExternalLink } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Concept, ConceptBrief, generateDemoConcept, STYLE_OPTIONS, StyleOption, saveConceptLocally } from '@/lib/concepts';
 import { ComparisonView } from '@/components/studio/ComparisonView';
@@ -66,7 +66,8 @@ export function Studio() {
         beforeImage,
         brief: brief as ConceptBrief,
         summary: result.summary,
-        palette: result.palette
+        palette: result.palette,
+        rationale: result.rationale
       };
       setConcept(newConcept);
       setGenerating(false);
@@ -82,26 +83,12 @@ export function Studio() {
     }
   };
 
-  if (presentation && concept) {
-     return (
-       <div className="fixed inset-0 z-50 bg-[#110e0c] text-white overflow-hidden flex flex-col">
-         <div className="p-6 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent absolute top-0 w-full z-10">
-           <div>
-             <Pill accent>Presentation view</Pill>
-             <h2 className="serif text-3xl mt-2 drop-shadow-md">{concept.title}</h2>
-           </div>
-           <button onClick={() => setPresentation(false)} className="btn-ghost border-white/20 hover:bg-white/10 rounded-full px-4 py-2 flex items-center gap-2 text-sm text-white backdrop-blur-md">
-             <Undo2 size={16} /> Exit
-           </button>
-         </div>
-         <div className="flex-1 flex items-center justify-center p-6 md:p-12 pt-24 h-full w-full">
-            <div className="w-full h-full max-w-7xl max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-               <ComparisonView beforeImage={concept.beforeImage} afterComponent={<DemoAfterVisual concept={concept} />} />
-            </div>
-         </div>
-       </div>
-     )
-  }
+  const present = () => {
+    if (concept) {
+      saveConceptLocally(concept);
+      setLocation(`/present/${concept.id}`);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-[1440px] px-5 py-7 md:px-10 md:py-10">
@@ -134,7 +121,7 @@ export function Studio() {
                 </div>
                 
                 <div className="absolute bottom-4 right-4 flex gap-2 z-10">
-                   <button onClick={() => setPresentation(true)} className="flex h-9 px-4 items-center gap-2 justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md text-xs hover:bg-white/20 transition-colors" data-testid="button-present"><ExternalLink size={14}/> Present</button>
+                   <button onClick={present} className="flex h-9 px-4 items-center gap-2 justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md text-xs hover:bg-white/20 transition-colors" data-testid="button-present"><ExternalLink size={14}/> Present</button>
                 </div>
               </>
             ) : (
@@ -163,8 +150,11 @@ export function Studio() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button onClick={save} className="btn-primary text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium" data-testid="button-save-concept"><Bookmark size={14}/> Save to projects</button>
-                  <button onClick={() => window.print()} className="btn-ghost text-xs px-4 py-2.5 rounded-lg flex items-center gap-2" data-testid="button-download-concept"><Download size={14}/> Download</button>
                 </div>
+              </div>
+              <div className="mt-6">
+                <h3 className="mono text-[10px] uppercase tracking-widest text-[hsl(var(--primary))] mb-3">Design Rationale</h3>
+                <p className="text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">{concept.rationale}</p>
               </div>
               <PaletteStrip palette={concept.palette} />
               <ChangeSummary summary={concept.summary} scope={concept.scope} />

@@ -40,13 +40,14 @@ export interface Concept {
   brief: ConceptBrief;
   summary: ConceptSummary;
   palette: PaletteSwatch[];
+  rationale: string;
 }
 
 export const STYLE_OPTIONS: StyleOption[] = [
   'Warm minimal', 'Japandi', 'Luxury', 'Scandinavian', 'Industrial', 'Coastal'
 ];
 
-export const STYLE_DATA: Record<StyleOption, { palette: PaletteSwatch[], summaries: Partial<ConceptSummary> }> = {
+export const STYLE_DATA: Record<StyleOption, { palette: PaletteSwatch[], summaries: Partial<ConceptSummary>, rationale: string }> = {
   'Warm minimal': {
     palette: [
       { name: 'Oat plaster', color: '#EBE5D9' },
@@ -61,7 +62,8 @@ export const STYLE_DATA: Record<StyleOption, { palette: PaletteSwatch[], summari
       walls: 'Warm oat plaster finish with minimal trim.',
       flooring: 'Wide-plank pale oak with an undyed wool rug.',
       fixtures: 'Bronze hardware with seamless built-in joinery.'
-    }
+    },
+    rationale: 'A warm, livable direction that keeps the architectural bones and makes space for the people in it. A little less noise, more room for the morning light to do its work.'
   },
   'Japandi': {
     palette: [
@@ -77,7 +79,8 @@ export const STYLE_DATA: Record<StyleOption, { palette: PaletteSwatch[], summari
       walls: 'Soft warm white flat paint, reducing visual noise.',
       flooring: 'Light timber floors layered with a flat-weave natural rug.',
       fixtures: 'Matte black minimalist hardware and handles.'
-    }
+    },
+    rationale: 'This direction keeps the room calm and open while adding warmer wood tones, softer lighting, and lower-profile furniture to create a serene, functional space.'
   },
   'Luxury': {
     palette: [
@@ -93,7 +96,8 @@ export const STYLE_DATA: Record<StyleOption, { palette: PaletteSwatch[], summari
       walls: 'Deep charcoal accent wall with subtle wainscoting.',
       flooring: 'Dark oak herringbone floors under a hand-tufted silk rug.',
       fixtures: 'Polished brass hardware and marble-wrapped surfaces.'
-    }
+    },
+    rationale: 'This concept uses contrast, richer materials, and layered lighting to make the room feel more tailored, dramatic, and unmistakably premium.'
   },
   'Scandinavian': {
     palette: [
@@ -109,7 +113,8 @@ export const STYLE_DATA: Record<StyleOption, { palette: PaletteSwatch[], summari
       walls: 'Crisp cloud white walls to maximize natural light bounce.',
       flooring: 'Pale ash floorboards with a minimal light gray rug.',
       fixtures: 'Matte white and brushed nickel minimalist fixtures.'
-    }
+    },
+    rationale: 'Focused on breathability and function, this approach brightens the room by relying on pale woods, soft wool textures, and an abundance of reflected light.'
   },
   'Industrial': {
     palette: [
@@ -125,7 +130,8 @@ export const STYLE_DATA: Record<StyleOption, { palette: PaletteSwatch[], summari
       walls: 'Exposed or faux brick texture with raw concrete accents.',
       flooring: 'Polished concrete or deeply distressed wood floors.',
       fixtures: 'Industrial pipe-style hardware and dark metal grids.'
-    }
+    },
+    rationale: 'By leaning into raw textures like leather, metal, and exposed elements, this direction gives the room a sense of history, grounding, and unpretentious character.'
   },
   'Coastal': {
     palette: [
@@ -141,7 +147,8 @@ export const STYLE_DATA: Record<StyleOption, { palette: PaletteSwatch[], summari
       walls: 'Breezy white walls with soft sea-glass accents.',
       flooring: 'Driftwood-toned flooring layered with a chunky jute rug.',
       fixtures: 'Brushed nickel hardware and whitewashed timber.'
-    }
+    },
+    rationale: 'This direction brightens the space with breathable fabrics, pale woods, and relaxed finishes, bringing a soft, organic coastal rhythm indoors without feeling thematic.'
   }
 };
 
@@ -161,7 +168,7 @@ export function generateDemoConcept(draft: {
     keep: draft.brief.keep || 'Camera angle, room dimensions, window and door positions.'
   };
 
-  return { summary, palette: data.palette };
+  return { summary, palette: data.palette, rationale: data.rationale };
 }
 
 const STORAGE_KEY = 'reno_concepts';
@@ -180,15 +187,67 @@ export function getSavedConcepts(): Concept[] {
   }
 }
 
+const DELETED_SEEDS_KEY = 'reno_deleted_seeds';
+const SEED_FAVORITES_KEY = 'reno_seed_favorites';
+
+function readIdSet(key: string): Set<string> {
+  try {
+    const data = localStorage.getItem(key);
+    return new Set(data ? (JSON.parse(data) as string[]) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function writeIdSet(key: string, ids: Set<string>) {
+  localStorage.setItem(key, JSON.stringify([...ids]));
+}
+
+function isSeedId(id: string): boolean {
+  return SEED_CONCEPTS.some(c => c.id === id);
+}
+
+/** All visible concepts: user-saved first, then seeds (minus deleted, with favorite overrides). */
+export function getAllConcepts(): Concept[] {
+  const deleted = readIdSet(DELETED_SEEDS_KEY);
+  const seedFavs = readIdSet(SEED_FAVORITES_KEY);
+  const seeds = SEED_CONCEPTS
+    .filter(c => !deleted.has(c.id))
+    .map(c => (seedFavs.has(c.id) ? { ...c, favorite: !c.favorite } : c));
+  return [...getSavedConcepts(), ...seeds];
+}
+
 export function toggleFavoriteLocally(id: string) {
+  if (isSeedId(id)) {
+    const favs = readIdSet(SEED_FAVORITES_KEY);
+    if (favs.has(id)) { favs.delete(id); } else { favs.add(id); }
+    writeIdSet(SEED_FAVORITES_KEY, favs);
+    return;
+  }
   const existing = getSavedConcepts();
   const updated = existing.map(c => c.id === id ? { ...c, favorite: !c.favorite } : c);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 }
 
+export function deleteConceptLocally(id: string) {
+  if (isSeedId(id)) {
+    const deleted = readIdSet(DELETED_SEEDS_KEY);
+    deleted.add(id);
+    writeIdSet(DELETED_SEEDS_KEY, deleted);
+    return;
+  }
+  const existing = getSavedConcepts();
+  const updated = existing.filter(c => c.id !== id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+}
+
+export function clearDemoConceptsLocally() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
 export const SEED_CONCEPTS: Concept[] = [
-  { id: 'c-104', title: 'The quiet corner', client: 'Maya & Theo', room: 'Living room', style: 'Warm minimal', scope: 'Restyle', date: 'Feb 18, 2025', createdAt: 0, favorite: true, image: 'after', beforeImage: '', budget: '$18–24k', brief: {} as any, summary: STYLE_DATA['Warm minimal'].summaries as any, palette: STYLE_DATA['Warm minimal'].palette },
-  { id: 'c-103', title: 'Sunday light', client: 'North & Pine', room: 'Kitchen', style: 'Scandinavian', scope: 'Renovate', date: 'Feb 12, 2025', createdAt: 0, favorite: false, image: 'loft', beforeImage: '', budget: '$32–40k', brief: {} as any, summary: STYLE_DATA['Scandinavian'].summaries as any, palette: STYLE_DATA['Scandinavian'].palette },
-  { id: 'c-102', title: 'A room to exhale', client: 'Elena Rodriguez', room: 'Bedroom', style: 'Warm minimal', scope: 'Restyle', date: 'Jan 29, 2025', createdAt: 0, favorite: true, image: 'studio', beforeImage: '', budget: '$14–18k', brief: {} as any, summary: STYLE_DATA['Warm minimal'].summaries as any, palette: STYLE_DATA['Warm minimal'].palette },
-  { id: 'c-101', title: 'After the rain', client: 'Oak Street Studio', room: 'Entryway', style: 'Industrial', scope: 'Restyle', date: 'Jan 21, 2025', createdAt: 0, favorite: false, image: 'before', beforeImage: '', budget: '$8–12k', brief: {} as any, summary: STYLE_DATA['Industrial'].summaries as any, palette: STYLE_DATA['Industrial'].palette },
+  { id: 'c-104', title: 'The quiet corner', client: 'Maya & Theo', room: 'Living room', style: 'Warm minimal', scope: 'Restyle', date: 'Feb 18, 2025', createdAt: 0, favorite: true, image: 'after', beforeImage: '', budget: '$18–24k', brief: {} as any, summary: STYLE_DATA['Warm minimal'].summaries as any, palette: STYLE_DATA['Warm minimal'].palette, rationale: STYLE_DATA['Warm minimal'].rationale },
+  { id: 'c-103', title: 'Sunday light', client: 'North & Pine', room: 'Kitchen', style: 'Scandinavian', scope: 'Renovate', date: 'Feb 12, 2025', createdAt: 0, favorite: false, image: 'loft', beforeImage: '', budget: '$32–40k', brief: {} as any, summary: STYLE_DATA['Scandinavian'].summaries as any, palette: STYLE_DATA['Scandinavian'].palette, rationale: STYLE_DATA['Scandinavian'].rationale },
+  { id: 'c-102', title: 'A room to exhale', client: 'Elena Rodriguez', room: 'Bedroom', style: 'Warm minimal', scope: 'Restyle', date: 'Jan 29, 2025', createdAt: 0, favorite: true, image: 'studio', beforeImage: '', budget: '$14–18k', brief: {} as any, summary: STYLE_DATA['Warm minimal'].summaries as any, palette: STYLE_DATA['Warm minimal'].palette, rationale: STYLE_DATA['Warm minimal'].rationale },
+  { id: 'c-101', title: 'After the rain', client: 'Oak Street Studio', room: 'Entryway', style: 'Industrial', scope: 'Restyle', date: 'Jan 21, 2025', createdAt: 0, favorite: false, image: 'before', beforeImage: '', budget: '$8–12k', brief: {} as any, summary: STYLE_DATA['Industrial'].summaries as any, palette: STYLE_DATA['Industrial'].palette, rationale: STYLE_DATA['Industrial'].rationale },
 ];
