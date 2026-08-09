@@ -1,0 +1,223 @@
+You are continuing Reno Interior Studio on branch `replit-design-mvp`.
+
+Repo:
+https://github.com/nsirivolu27/RENO
+
+GOAL
+Build out the “After” part of the renovation experience so Reno feels like a real interior-design / renovation demo tool, not just an upload form.
+
+The product must clearly show:
+- the original room photo
+- the proposed renovated concept
+- what changed
+- what stayed the same
+- the design rationale
+- the materials / finishes / furniture / lighting direction
+
+This is the core value of Reno: before photo → after concept → client-ready explanation.
+
+IMPORTANT
+Keep the current warm, premium Replit design direction.
+Do not redesign everything from scratch.
+Do not overwrite main.
+Commit to the existing `replit-design-mvp` branch or a child branch like `replit-after-experience`.
+
+PRIMARY USER STORY
+A renovator is standing in a client’s home.
+They take or upload a photo of a room.
+They enter a design brief.
+Reno generates a proposed “After” concept.
+The renovator can show the client:
+“Here is your room now. Here is the proposed version. These are the furniture, lighting, wall, flooring, and fixture changes.”
+
+BUILD THE AFTER EXPERIENCE
+
+1. After Concept Result Panel
+When the user clicks Generate, show a polished “After Concept” section.
+
+It should include:
+- Large “After” visual
+- “Before” thumbnail or paired comparison
+- Room type
+- Selected style
+- Scope: Restyle or Renovate
+- Generated timestamp
+- Provider/mode badge: Demo Concept for now
+- Clear note if this is demo output, but do not make it feel broken
+
+Use client-friendly copy:
+- “Proposed concept”
+- “Original room”
+- “Design direction”
+- “Materials and finishes”
+- “Keep unchanged”
+- “Renovation scope”
+
+2. Demo After Image
+Until the real image provider is connected, the after result must feel intentional.
+
+Use the uploaded image as the before.
+For the after:
+- create a styled demo concept view, not a generic blank placeholder
+- it can use layered CSS/HTML/SVG/canvas
+- it should respond to selected style and brief fields
+- it should visually suggest furniture, wall color, lighting, flooring, and decor changes
+- it must look polished enough for a product demo
+
+Examples:
+- Japandi: warm neutrals, low sofa, wood tones, paper lamp, plants
+- Luxury: dark wall, marble/brass notes, chandelier, velvet accent
+- Scandinavian: light walls, pale wood, soft textiles, airy lighting
+- Industrial: dark metal, exposed texture, leather, warm bulbs
+- Coastal: white/sand palette, linen, light wood, blue accent
+
+Do not pretend it is a photoreal AI render if it is not.
+Label it as “Demo concept” or “Visual direction preview.”
+
+3. Before / After Comparison
+Create a strong comparison surface.
+
+Must include:
+- Compare mode
+- Before only
+- After only
+- draggable slider if practical, otherwise clean toggle tabs
+- mobile-friendly interaction
+- labels: BEFORE and AFTER
+- stable image dimensions so layout does not jump
+
+The comparison should be the hero of the Studio result area.
+
+4. Change Summary
+After generation, produce a structured summary based on the user’s selections and brief.
+
+Show sections:
+- Furniture and layout
+- Lighting
+- Walls / paint / treatments
+- Flooring / rugs
+- Fixtures / built-ins
+- Kept unchanged
+
+If a user leaves fields blank, generate sensible defaults based on style and room type.
+
+Example:
+Furniture and layout:
+“Low-profile sectional facing the media wall, two accent chairs near the window, open walking path through the center.”
+
+Lighting:
+“Warm recessed ceiling lights with one sculptural floor lamp and soft accent lighting.”
+
+Walls:
+“Warm white paint with a walnut slat feature wall behind the TV.”
+
+Keep unchanged:
+“Camera angle, room dimensions, window and door positions.”
+
+5. Materials / Palette Strip
+Add a small material palette below or beside the After concept:
+- 4 to 6 swatches
+- each swatch has a label
+Examples:
+- Warm white paint
+- White oak
+- Brass
+- Linen
+- Matte black
+- Stone / marble
+
+The palette should change based on selected style.
+
+6. Renovation Scope Clarity
+Restyle and Renovate must feel different.
+
+Restyle should say:
+- updates furniture
+- decor
+- rugs
+- art
+- lighting
+- textiles
+- keeps walls/flooring/fixtures/cabinetry
+
+Renovate should say:
+- updates furniture/decor
+- flooring
+- walls/paint/treatments
+- fixtures/hardware
+- cabinetry/built-ins
+- finishes
+
+Show this clearly in the result.
+
+7. Actions
+After a concept is generated, provide buttons:
+- Save concept
+- Regenerate
+- Download after image
+- Presentation view
+
+For now:
+- Save concept can use localStorage
+- Download can download the demo after image if possible, or export a simple PNG/SVG/card
+- Presentation view can be a clean full-screen or route/section that hides controls
+
+8. LocalStorage Saved Concepts
+Save concepts locally with:
+- id
+- before image
+- after/demo image or after concept data
+- room
+- style
+- scope
+- brief
+- summary
+- palette
+- createdAt
+- favorite boolean
+
+Add or improve a Concepts section/page where saved concepts can be reviewed.
+
+9. Mobile Requirements
+At around 390px width:
+- After concept should be immediately understandable
+- Before/after toggle must be easy to tap
+- Change summary should stack cleanly
+- Save / regenerate / presentation buttons should not overflow
+- Use real spacing and hierarchy
+
+10. Real Provider Readiness
+Keep the code ready for future API integration:
+- separate “demo after concept generation” from “real provider image generation”
+- name functions clearly
+- do not hard-code everything inside the render JSX if it can be cleanly separated
+- make it easy later to replace the demo after visual with an API image URL/base64
+
+DO NOT
+- Do not add authentication or payments in this task
+- Do not add Supabase/Stripe yet
+- Do not force push
+- Do not remove existing UI sections unless replacing them with better equivalents
+- Do not leave the after state as plain text only
+- Do not make the demo result feel like an error state
+
+VERIFY
+Before finishing:
+- Upload a sample room image
+- Fill in at least furniture, lighting, walls, flooring
+- Generate a demo concept
+- Confirm before/after display works
+- Confirm style changes affect the after concept
+- Confirm save concept works
+- Confirm mobile width looks good
+- Confirm no console errors
+- Run typecheck/build if scripts exist
+
+REPORT BACK
+When done, report:
+- what files changed
+- how the After concept works
+- what is demo-only
+- how saved concepts work
+- how to run locally
+- what still needs real AI provider integration
