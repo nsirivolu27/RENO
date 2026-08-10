@@ -11,6 +11,11 @@ export interface HealthStatus {
 
 export interface ApiError {
   error: string;
+  code?: string;
+  provider?: string;
+  /** @nullable */
+  model?: string | null;
+  renderId?: string;
 }
 
 export interface Brief {
@@ -38,6 +43,28 @@ export const ConceptStatus = {
   completed: 'completed',
 } as const;
 
+export type RenderMetadataProvider = typeof RenderMetadataProvider[keyof typeof RenderMetadataProvider];
+
+
+export const RenderMetadataProvider = {
+  gemini: 'gemini',
+  openai: 'openai',
+  none: 'none',
+} as const;
+
+export interface RenderMetadata {
+  success: boolean;
+  /** @nullable */
+  resultImageUrl: string | null;
+  provider: RenderMetadataProvider;
+  /** @nullable */
+  model: string | null;
+  isDemo: boolean;
+  renderId: string;
+  errorCode?: string;
+  message?: string;
+}
+
 export interface Concept {
   id: string;
   /** @nullable */
@@ -51,6 +78,7 @@ export interface Concept {
   status: ConceptStatus;
   isFavorite: boolean;
   brief: Brief;
+  render: RenderMetadata;
   createdAt: string;
 }
 
@@ -103,6 +131,7 @@ export interface ConceptGenerateInput {
   style: string;
   mode: ConceptGenerateInputMode;
   sourceImageUrl: string;
+  renderSourceImageUrl?: string;
   brief: Brief;
 }
 
