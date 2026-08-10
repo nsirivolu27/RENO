@@ -8,6 +8,7 @@
 import type { Brief } from './brief';
 import type { ConceptMode } from './conceptMode';
 import type { ConceptStatus } from './conceptStatus';
+import type { RenderMetadata } from './renderMetadata';
 
 export interface Concept {
   id: string;
@@ -22,5 +23,6 @@ export interface Concept {
   status: ConceptStatus;
   isFavorite: boolean;
   brief: Brief;
+  render: RenderMetadata;
   createdAt: Date;
 }
