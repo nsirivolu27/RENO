@@ -14,6 +14,15 @@ export function ConceptDetail({ concepts }: { concepts: Concept[] }) {
     : concept.beforeImage
       ? { backgroundImage: `url(${concept.beforeImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
       : {};
+  const downloadAfterImage = () => {
+    if (!concept.afterImage) return;
+    const anchor = document.createElement('a');
+    anchor.href = concept.afterImage;
+    anchor.download = `reno-after-${concept.room.toLowerCase().replace(/\s+/g, '-')}.png`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  };
 
   return <div className="mx-auto max-w-[1440px] px-5 py-8 md:px-10 md:py-12">
     <button onClick={() => setLocation('/projects')} className="mb-8 flex items-center gap-2 text-xs muted hover:text-[hsl(var(--primary))] transition-colors" data-testid="button-back-projects"><ChevronLeft size={15} />All projects</button>
@@ -22,7 +31,7 @@ export function ConceptDetail({ concepts }: { concepts: Concept[] }) {
         <div className="relative aspect-[1.3/1] overflow-hidden rounded-2xl border hairline bg-[#776657]">
           <div className={concept.image ? `room-image ${concept.image} absolute inset-0` : "absolute inset-0"} style={bgStyle} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />
-          <div className="absolute left-5 top-5"><Pill accent>client presentation · {concept.id}</Pill></div>
+           <div className="absolute left-5 top-5"><Pill accent>{concept.render?.isDemo ? 'demo preview' : 'photoreal render'} · {concept.id}</Pill></div>
           <div className="absolute bottom-6 left-6 text-white drop-shadow-md">
             <p className="mono text-[10px] uppercase tracking-[.12em] text-[#e1bf8e]">After / concept direction</p>
             <h1 className="serif mt-2 text-4xl sm:text-5xl italic">{concept.title}</h1>
@@ -56,7 +65,8 @@ export function ConceptDetail({ concepts }: { concepts: Concept[] }) {
             ['Direction',concept.style],
             ['Budget guide',concept.budget],
             ['Scope',concept.scope],
-            ['Status','Ready to share']
+             ['Status', concept.render?.isDemo ? 'Demo preview' : 'Ready to share'],
+             ['Renderer', concept.render?.model || concept.render?.provider || 'Local seed']
           ].map(([term,val]) => (
             <div key={term} className="flex justify-between border-b hairline py-4 text-sm">
               <dt className="muted">{term}</dt>
@@ -77,6 +87,7 @@ export function ConceptDetail({ concepts }: { concepts: Concept[] }) {
             a.download = `reno-concept-${concept.room.toLowerCase().replace(/\s+/g, '-')}.json`;
             a.click();
           }} className="btn-ghost flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:text-[hsl(var(--primary))]" data-testid="button-download-json"><Download size={15} /></button>
+           <button onClick={downloadAfterImage} disabled={!concept.afterImage} className="btn-ghost flex h-11 items-center gap-2 justify-center rounded-xl px-3 text-xs transition-colors hover:text-[hsl(var(--primary))] disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-download-after"><Download size={15} /> After</button>
           <button onClick={() => {
              const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
              navigator.clipboard.writeText(`${window.location.origin}${baseUrl}present/${concept.id}`);
