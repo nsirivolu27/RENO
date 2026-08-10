@@ -17,5 +17,6 @@ export interface ConceptGenerateInput {
   style: string;
   mode: ConceptGenerateInputMode;
   sourceImageUrl: string;
+  renderSourceImageUrl?: string;
   brief: Brief;
 }
