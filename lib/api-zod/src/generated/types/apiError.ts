@@ -8,4 +8,9 @@
 
 export interface ApiError {
   error: string;
+  code?: string;
+  provider?: string;
+  /** @nullable */
+  model?: string | null;
+  renderId?: string;
 }
