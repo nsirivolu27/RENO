@@ -26,6 +26,14 @@ const seedConcept: Concept = {
     mustKeep: "The sofa, window light, and open feeling of the room.",
   },
   createdAt: new Date("2026-08-07T16:30:00.000Z"),
+  render: {
+    success: true,
+    resultImageUrl: sampleAfter,
+    provider: "none",
+    model: null,
+    isDemo: true,
+    renderId: "seed",
+  },
 };
 
 const projects = new Map<string, Project>([
