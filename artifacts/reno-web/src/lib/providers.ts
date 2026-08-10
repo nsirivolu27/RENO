@@ -31,8 +31,18 @@ export interface ConceptRenderer {
   render(input: RenderProviderInput): Promise<RenderProviderResult>;
 }
 
+export function buildConceptEndpoint(
+  apiBaseUrl: string,
+  projectId?: string,
+): string {
+  const base = apiBaseUrl.replace(/\/+$/, '');
+  return projectId
+    ? `${base}/api/projects/${projectId}/concepts`
+    : `${base}/api/concepts`;
+}
+
 function apiBase(): string {
-  return (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+  return (import.meta.env.VITE_API_BASE_URL || '/').replace(/\/+$/, '');
 }
 
 function normalizeBrief(brief: Partial<ConceptBrief>) {
@@ -49,9 +59,7 @@ function normalizeBrief(brief: Partial<ConceptBrief>) {
 
 export const apiConceptRenderer: ConceptRenderer = {
   async render(input) {
-    const endpoint = input.projectId
-      ? `${apiBase()}/api/projects/${input.projectId}/concepts`
-      : `${apiBase()}/api/concepts`;
+    const endpoint = buildConceptEndpoint(apiBase(), input.projectId);
 
     const response = await fetch(endpoint, {
       method: 'POST',
