@@ -109,11 +109,20 @@ router.post("/projects/:projectId/concepts", async (req, res): Promise<void> => 
     return;
   }
 
-  const concept = generateDemoConcept(body.data, params.data.projectId, Date.now());
-  const resultImageUrl = await renderRenovationAfterImage(body.data);
-  if (resultImageUrl) {
-    concept.resultImageUrl = resultImageUrl;
+  const render = await renderRenovationAfterImage(body.data);
+  if (!render.success || !render.resultImageUrl) {
+    res.status(502).json({
+      error: render.message || "Photoreal render failed",
+      code: render.errorCode || "PROVIDER_ERROR",
+      provider: render.provider,
+      model: render.model,
+      renderId: render.renderId,
+    });
+    return;
   }
+  const concept = generateDemoConcept(body.data, params.data.projectId, Date.now());
+  concept.resultImageUrl = render.resultImageUrl;
+  concept.render = render;
   addConcept(params.data.projectId, concept);
   res.status(201).json(GenerateProjectConceptResponse.parse(concept));
 });
