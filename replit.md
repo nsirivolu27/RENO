@@ -5,11 +5,13 @@ _Replace the heading above with the project's name, and this line with one sente
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/scripts run reno-api-smoke` — verify the proxied Reno web/API boundary
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+- Reno web uses the same-origin API base (`VITE_API_BASE_URL=/`) so `/api/*` is routed by the shared artifact proxy to the API Server.
 
 ## Stack
 
