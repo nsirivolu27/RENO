@@ -15,8 +15,6 @@ import * as zod from 'zod';
 export const HealthCheckResponse = zod.object({
   "status": zod.string()
 })
-
-
 /**
  * Returns the counts and recent activity needed for the studio overview.
  * @summary Get studio summary
@@ -45,11 +43,19 @@ export const GetStudioSummaryResponse = zod.object({
   "budget": zod.string(),
   "mustKeep": zod.string()
 }),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
+}),
   "createdAt": zod.coerce.date()
 }))
 })
-
-
 /**
  * @summary List projects
  */
@@ -84,6 +90,16 @@ export const ListProjectsResponseItem = zod.object({
   "fixtures": zod.string(),
   "budget": zod.string(),
   "mustKeep": zod.string()
+}),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
 }),
   "createdAt": zod.coerce.date()
 })),
@@ -132,6 +148,16 @@ export const CreateProjectResponse = zod.object({
   "budget": zod.string(),
   "mustKeep": zod.string()
 }),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
+}),
   "createdAt": zod.coerce.date()
 })),
   "createdAt": zod.coerce.date(),
@@ -175,6 +201,16 @@ export const GetProjectResponse = zod.object({
   "fixtures": zod.string(),
   "budget": zod.string(),
   "mustKeep": zod.string()
+}),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
 }),
   "createdAt": zod.coerce.date()
 })),
@@ -229,6 +265,16 @@ export const UpdateProjectResponse = zod.object({
   "budget": zod.string(),
   "mustKeep": zod.string()
 }),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
+}),
   "createdAt": zod.coerce.date()
 })),
   "createdAt": zod.coerce.date(),
@@ -257,6 +303,7 @@ export const GenerateProjectConceptBody = zod.object({
   "style": zod.string().min(1),
   "mode": zod.enum(['restyle', 'renovate']),
   "sourceImageUrl": zod.string(),
+  "renderSourceImageUrl": zod.string().optional(),
   "brief": zod.object({
   "furnitureLayout": zod.string(),
   "lighting": zod.string(),
@@ -288,10 +335,18 @@ export const GenerateProjectConceptResponse = zod.object({
   "budget": zod.string(),
   "mustKeep": zod.string()
 }),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
+}),
   "createdAt": zod.coerce.date()
 })
-
-
 /**
  * @summary Generate a concept without a project
  */
@@ -306,6 +361,7 @@ export const GenerateConceptBody = zod.object({
   "style": zod.string().min(1),
   "mode": zod.enum(['restyle', 'renovate']),
   "sourceImageUrl": zod.string(),
+  "renderSourceImageUrl": zod.string().optional(),
   "brief": zod.object({
   "furnitureLayout": zod.string(),
   "lighting": zod.string(),
@@ -337,10 +393,18 @@ export const GenerateConceptResponse = zod.object({
   "budget": zod.string(),
   "mustKeep": zod.string()
 }),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
+}),
   "createdAt": zod.coerce.date()
 })
-
-
 /**
  * @summary Get a concept
  */
@@ -370,6 +434,16 @@ export const GetConceptResponse = zod.object({
   "fixtures": zod.string(),
   "budget": zod.string(),
   "mustKeep": zod.string()
+}),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
 }),
   "createdAt": zod.coerce.date()
 })
@@ -409,5 +483,17 @@ export const ToggleConceptFavoriteResponse = zod.object({
   "budget": zod.string(),
   "mustKeep": zod.string()
 }),
+  "render": zod.object({
+  "success": zod.boolean(),
+  "resultImageUrl": zod.string().nullable(),
+  "provider": zod.enum(['gemini', 'openai', 'none']),
+  "model": zod.string().nullable(),
+  "isDemo": zod.boolean(),
+  "renderId": zod.string(),
+  "errorCode": zod.string().optional(),
+  "message": zod.string().optional()
+}),
   "createdAt": zod.coerce.date()
 })
+
+
