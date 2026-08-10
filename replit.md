@@ -11,7 +11,7 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
-- Reno web uses the same-origin API base (`VITE_API_BASE_URL=/`) so `/api/*` is routed by the shared artifact proxy to the API Server.
+- Reno web uses the same-origin API base (`VITE_API_BASE_URL=/`). Its Vite development server proxies `/api/*` to `http://127.0.0.1:8080`, while the API artifact owns `/api` in the shared production router.
 
 ## Stack
 
