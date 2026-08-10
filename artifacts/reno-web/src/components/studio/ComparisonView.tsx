@@ -1,12 +1,15 @@
 import { useState, useRef } from 'react';
+import type { ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function ComparisonView({
   beforeImage,
+  afterImage,
   afterComponent
 }: {
   beforeImage: string;
-  afterComponent: React.ReactNode;
+  afterImage?: string;
+  afterComponent?: ReactNode;
 }) {
   const [split, setSplit] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -47,7 +50,16 @@ export function ComparisonView({
     >
       {/* Base: After */}
       <div className="absolute inset-0 pointer-events-none">
-        {afterComponent}
+        {afterImage ? (
+          <img
+            src={afterImage}
+            alt="Photoreal proposed after renovation"
+            className="absolute inset-0 h-full w-full object-cover"
+            draggable={false}
+          />
+        ) : (
+          afterComponent
+        )}
       </div>
 
       {/* Overlay: Before */}

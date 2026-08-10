@@ -1,11 +1,5 @@
 import type { Brief, Concept, ConceptGenerateInput } from "@workspace/api-zod";
 
-const demoAfterImages = [
-  "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=85",
-  "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=85",
-  "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85",
-];
-
 const normalizedBrief = (brief: Brief): Brief => ({
   furnitureLayout: brief.furnitureLayout,
   lighting: brief.lighting,
@@ -34,7 +28,7 @@ export function generateDemoConcept(
     style: styleTitle,
     mode: input.mode,
     sourceImageUrl: input.sourceImageUrl,
-    resultImageUrl: demoAfterImages[sequence % demoAfterImages.length],
+    resultImageUrl: "",
     status: "completed",
     isFavorite: false,
     brief: normalizedBrief(input.brief),

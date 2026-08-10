@@ -9,6 +9,7 @@ import { PaletteStrip } from '@/components/studio/PaletteStrip';
 import { ChangeSummary } from '@/components/studio/ChangeSummary';
 import { Pill } from '@/components/ui/pill';
 import { useToast } from '@/hooks/use-toast';
+import { apiConceptRenderer } from '@/lib/providers';
 
 export function Studio() {
   const [projects] = useState<Project[]>(() => getProjects());
@@ -74,14 +75,23 @@ export function Studio() {
     }
   };
 
-  const generate = () => {
+  const generate = async () => {
     setGenerating(true);
-    window.setTimeout(() => {
+    try {
       const proj = projects.find(p => p.id === selectedProjectId);
       const clientName = proj ? proj.clientName : 'Demo Client';
       const budget = brief.budget || (proj ? proj.budgetRange : 'TBD');
 
       const result = generateDemoConcept({ style, scope: mode, brief });
+      const renderResult = await apiConceptRenderer.render({
+        title: `${style} ${room}`,
+        room,
+        style,
+        scope: mode,
+        beforeImage,
+        brief,
+        projectId: selectedProjectId || undefined,
+      });
       const newConcept: Concept = {
         id: `c-${Math.floor(Math.random()*10000)}`,
         title: `${style} ${room}`,
@@ -94,6 +104,7 @@ export function Studio() {
         favorite: false,
         budget,
         beforeImage,
+        afterImage: renderResult.afterImage,
         brief: brief as ConceptBrief,
         summary: result.summary,
         palette: result.palette,
@@ -102,7 +113,13 @@ export function Studio() {
       setConcept(newConcept);
       setGenerating(false);
       setView('compare');
-    }, 1200);
+      if (renderResult.afterImage) {
+        toast({ title: 'Photoreal after ready', description: 'The backend returned an AI-rendered renovation image.' });
+      }
+    } catch {
+      toast({ title: 'Generation failed', description: 'Try again with a smaller photo or simpler brief.' });
+      setGenerating(false);
+    }
   };
 
   const save = () => {
@@ -144,9 +161,17 @@ export function Studio() {
           <div className="relative aspect-[4/3] sm:min-h-[500px] overflow-hidden rounded-2xl border hairline bg-[#776657] shadow-xl">
             {concept ? (
               <>
-                {view === 'compare' && <ComparisonView beforeImage={concept.beforeImage} afterComponent={<DemoAfterVisual concept={concept} />} />}
+                {view === 'compare' && <ComparisonView beforeImage={concept.beforeImage} afterImage={concept.afterImage} afterComponent={<DemoAfterVisual concept={concept} />} />}
                 {view === 'before' && <img src={concept.beforeImage} alt="Before" className="absolute inset-0 w-full h-full object-cover" />}
-                {view === 'after' && <div className="absolute inset-0"><DemoAfterVisual concept={concept} /></div>}
+                {view === 'after' && (
+                  <div className="absolute inset-0">
+                    {concept.afterImage ? (
+                      <img src={concept.afterImage} alt="Photoreal proposed after renovation" className="h-full w-full object-cover" />
+                    ) : (
+                      <DemoAfterVisual concept={concept} />
+                    )}
+                  </div>
+                )}
                 
                 <div className="absolute bottom-4 left-4 flex gap-1 rounded-full border border-white/20 bg-black/40 p-1 backdrop-blur-md z-10">
                   {(['compare', 'before', 'after'] as const).map(v => (
@@ -180,7 +205,7 @@ export function Studio() {
               <div className="flex flex-col sm:flex-row gap-6 justify-between items-start border-b hairline pb-6">
                 <div>
                   <h2 className="serif text-3xl">Proposed Concept</h2>
-                  <p className="text-sm text-[hsl(var(--muted-foreground))] mt-2">Scope: {concept.scope} · Style: {concept.style}</p>
+                  <p className="text-sm text-[hsl(var(--muted-foreground))] mt-2">Scope: {concept.scope} · Style: {concept.style} · {concept.afterImage ? 'Photoreal render' : 'Demo concept'}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button onClick={save} className="btn-primary text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium" data-testid="button-save-concept"><Bookmark size={14}/> Save to projects</button>

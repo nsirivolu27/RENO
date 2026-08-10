@@ -86,7 +86,7 @@ export function Present({ concepts }: { concepts: Concept[] }) {
 
         {/* Large Before/After */}
         <div className="relative aspect-[16/10] md:aspect-[21/9] w-full overflow-hidden rounded-2xl border hairline bg-[#776657] shadow-xl print:shadow-none print:break-inside-avoid">
-           <ComparisonView beforeImage={concept.beforeImage} afterComponent={<DemoAfterVisual concept={concept} />} />
+           <ComparisonView beforeImage={concept.beforeImage} afterImage={concept.afterImage} afterComponent={<DemoAfterVisual concept={concept} />} />
         </div>
 
         {/* Rationale & Palette */}

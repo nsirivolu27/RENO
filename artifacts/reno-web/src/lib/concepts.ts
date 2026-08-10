@@ -36,6 +36,7 @@ export interface Concept {
   favorite: boolean;
   budget: string;
   beforeImage: string;
+  afterImage?: string;
   image?: string; 
   brief: ConceptBrief;
   summary: ConceptSummary;

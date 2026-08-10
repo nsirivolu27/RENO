@@ -6,7 +6,11 @@ import { Project } from '@/lib/projects';
 import { Pill } from '@/components/ui/pill';
 
 export function ConceptCard({ concept, projects, onFavorite, onDelete, onAttach }: { concept: Concept, projects: Project[], onFavorite: (id: string) => void, onDelete: (id: string) => void, onAttach: (projectId: string, conceptId: string) => void }) {
-  const bgStyle = concept.beforeImage ? { backgroundImage: `url(${concept.beforeImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {};
+  const bgStyle = concept.afterImage
+    ? { backgroundImage: `url(${concept.afterImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : concept.beforeImage
+      ? { backgroundImage: `url(${concept.beforeImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+      : {};
   const currentProject = projects.find(p => p.conceptIds.includes(concept.id));
   const [, setLocation] = useLocation();
 

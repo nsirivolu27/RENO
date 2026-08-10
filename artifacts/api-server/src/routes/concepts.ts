@@ -14,10 +14,11 @@ import {
   getConcept,
   updateConceptFavorite,
 } from "../lib/gateway-store";
+import { renderRenovationAfterImage } from "../lib/renovation-renderer";
 
 const router: IRouter = Router();
 
-router.post("/concepts", (req, res): void => {
+router.post("/concepts", async (req, res): Promise<void> => {
   const body = GenerateConceptBody.safeParse(req.body);
   if (!body.success) {
     res.status(400).json({ error: body.error.message });
@@ -25,6 +26,10 @@ router.post("/concepts", (req, res): void => {
   }
 
   const concept = generateDemoConcept(body.data, null, Date.now());
+  const resultImageUrl = await renderRenovationAfterImage(body.data);
+  if (resultImageUrl) {
+    concept.resultImageUrl = resultImageUrl;
+  }
   addConcept(null, concept);
   res.status(201).json(GenerateConceptResponse.parse(concept));
 });

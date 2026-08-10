@@ -21,6 +21,7 @@ import {
   listProjects,
   updateProject,
 } from "../lib/gateway-store";
+import { renderRenovationAfterImage } from "../lib/renovation-renderer";
 
 const router: IRouter = Router();
 
@@ -92,7 +93,7 @@ router.patch("/projects/:projectId", (req, res): void => {
   res.json(UpdateProjectResponse.parse(project));
 });
 
-router.post("/projects/:projectId/concepts", (req, res): void => {
+router.post("/projects/:projectId/concepts", async (req, res): Promise<void> => {
   const params = GenerateProjectConceptParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -109,6 +110,10 @@ router.post("/projects/:projectId/concepts", (req, res): void => {
   }
 
   const concept = generateDemoConcept(body.data, params.data.projectId, Date.now());
+  const resultImageUrl = await renderRenovationAfterImage(body.data);
+  if (resultImageUrl) {
+    concept.resultImageUrl = resultImageUrl;
+  }
   addConcept(params.data.projectId, concept);
   res.status(201).json(GenerateProjectConceptResponse.parse(concept));
 });

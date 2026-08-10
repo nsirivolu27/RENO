@@ -9,7 +9,11 @@ export function ConceptDetail({ concepts }: { concepts: Concept[] }) {
   const [, setLocation] = useLocation();
 
   if (!concept) return null;
-  const bgStyle = concept.beforeImage ? { backgroundImage: `url(${concept.beforeImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {};
+  const bgStyle = concept.afterImage
+    ? { backgroundImage: `url(${concept.afterImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : concept.beforeImage
+      ? { backgroundImage: `url(${concept.beforeImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+      : {};
 
   return <div className="mx-auto max-w-[1440px] px-5 py-8 md:px-10 md:py-12">
     <button onClick={() => setLocation('/projects')} className="mb-8 flex items-center gap-2 text-xs muted hover:text-[hsl(var(--primary))] transition-colors" data-testid="button-back-projects"><ChevronLeft size={15} />All projects</button>
