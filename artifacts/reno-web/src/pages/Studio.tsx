@@ -1,5 +1,5 @@
 import { useState, useRef, ChangeEvent, useEffect } from 'react';
-import { ImagePlus, MoreHorizontal, Check, WandSparkles, Bookmark, ExternalLink } from 'lucide-react';
+import { ImagePlus, MoreHorizontal, Check, WandSparkles, Bookmark, ExternalLink, AlertCircle } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Concept, ConceptBrief, generateDemoConcept, STYLE_OPTIONS, StyleOption, saveConceptLocally } from '@/lib/concepts';
 import { Project, getProjects, attachConceptToProject } from '@/lib/projects';
@@ -9,7 +9,7 @@ import { PaletteStrip } from '@/components/studio/PaletteStrip';
 import { ChangeSummary } from '@/components/studio/ChangeSummary';
 import { Pill } from '@/components/ui/pill';
 import { useToast } from '@/hooks/use-toast';
-import { apiConceptRenderer } from '@/lib/providers';
+import { apiConceptRenderer, RenderProviderError } from '@/lib/providers';
 
 export function Studio() {
   const [projects] = useState<Project[]>(() => getProjects());
@@ -19,13 +19,15 @@ export function Studio() {
   const [style, setStyle] = useState<StyleOption>('Warm minimal');
   const [mode, setMode] = useState<'Restyle' | 'Renovate'>('Restyle');
   
-  const [beforeImage, setBeforeImage] = useState<string>('https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1600');
+  const [beforeImage, setBeforeImage] = useState<string>('');
+  const [renderImage, setRenderImage] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [brief, setBrief] = useState<Partial<ConceptBrief>>({});
   
   const [generating, setGenerating] = useState(false);
   const [concept, setConcept] = useState<Concept | null>(null);
+  const [renderError, setRenderError] = useState<RenderProviderError | null>(null);
   
   const [view, setView] = useState<'compare' | 'before' | 'after'>('compare');
 
@@ -58,30 +60,45 @@ export function Studio() {
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        toast({ title: 'Unsupported image', description: 'Upload a JPEG, PNG, or WebP room photo.' });
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast({ title: 'Image is too large', description: 'Choose a room photo under 10 MB.' });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => setBeforeImage(String(reader.result));
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1000;
-        const scale = MAX_WIDTH / img.width;
-        canvas.width = MAX_WIDTH;
-        canvas.height = img.height * scale;
+        const maxEdge = 2048;
+        const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-        setBeforeImage(dataUrl);
+        setRenderImage(canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.86));
         setConcept(null);
+        setRenderError(null);
       };
+      reader.readAsDataURL(file);
       img.src = URL.createObjectURL(file);
     }
   };
 
   const generate = async () => {
     setGenerating(true);
+    setRenderError(null);
     try {
       const proj = projects.find(p => p.id === selectedProjectId);
       const clientName = proj ? proj.clientName : 'Demo Client';
       const budget = brief.budget || (proj ? proj.budgetRange : 'TBD');
 
+      if (!beforeImage.startsWith('data:image/')) {
+        throw { message: 'Upload a room photo before generating.', code: 'INVALID_SOURCE_IMAGE' };
+      }
       const result = generateDemoConcept({ style, scope: mode, brief });
       const renderResult = await apiConceptRenderer.render({
         title: `${style} ${room}`,
@@ -89,6 +106,7 @@ export function Studio() {
         style,
         scope: mode,
         beforeImage,
+        renderImage: renderImage || beforeImage,
         brief,
         projectId: selectedProjectId || undefined,
       });
@@ -108,16 +126,30 @@ export function Studio() {
         brief: brief as ConceptBrief,
         summary: result.summary,
         palette: result.palette,
-        rationale: result.rationale
+        rationale: result.rationale,
+        render: {
+          success: true,
+          resultImageUrl: renderResult.afterImage || null,
+          provider: renderResult.provider,
+          model: renderResult.model || null,
+          isDemo: false,
+          renderId: renderResult.renderId || ''
+        }
       };
       setConcept(newConcept);
       setGenerating(false);
       setView('compare');
-      if (renderResult.afterImage) {
-        toast({ title: 'Photoreal after ready', description: 'The backend returned an AI-rendered renovation image.' });
-      }
-    } catch {
-      toast({ title: 'Generation failed', description: 'Try again with a smaller photo or simpler brief.' });
+      toast({ title: 'Photoreal after ready', description: 'Gemini returned an AI-rendered renovation image.' });
+    } catch (error) {
+      const providerError = error as RenderProviderError;
+      setRenderError({
+        message: providerError.message || 'The photoreal renderer could not complete this request.',
+        code: providerError.code,
+        provider: providerError.provider,
+        model: providerError.model,
+        renderId: providerError.renderId,
+      });
+      toast({ title: 'Generation failed', description: providerError.message || 'Try again with a smaller photo or simpler brief.' });
       setGenerating(false);
     }
   };
@@ -161,14 +193,14 @@ export function Studio() {
           <div className="relative aspect-[4/3] sm:min-h-[500px] overflow-hidden rounded-2xl border hairline bg-[#776657] shadow-xl">
             {concept ? (
               <>
-                {view === 'compare' && <ComparisonView beforeImage={concept.beforeImage} afterImage={concept.afterImage} afterComponent={<DemoAfterVisual concept={concept} />} />}
+                {view === 'compare' && <ComparisonView beforeImage={concept.beforeImage} afterImage={concept.afterImage} afterComponent={concept.render?.isDemo ? <DemoAfterVisual concept={concept} /> : undefined} />}
                 {view === 'before' && <img src={concept.beforeImage} alt="Before" className="absolute inset-0 w-full h-full object-cover" />}
                 {view === 'after' && (
                   <div className="absolute inset-0">
                     {concept.afterImage ? (
                       <img src={concept.afterImage} alt="Photoreal proposed after renovation" className="h-full w-full object-cover" />
                     ) : (
-                      <DemoAfterVisual concept={concept} />
+                      concept.render?.isDemo ? <DemoAfterVisual concept={concept} /> : <div className="flex h-full items-center justify-center text-sm text-white/80">No photoreal image available.</div>
                     )}
                   </div>
                 )}
@@ -185,7 +217,11 @@ export function Studio() {
               </>
             ) : (
               <div className="absolute inset-0">
-                <img src={beforeImage} alt="Before upload" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" />
+                {beforeImage ? (
+                  <img src={beforeImage} alt="Before upload" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" />
+                ) : (
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(225,202,163,.32),transparent_38%),linear-gradient(135deg,#765d4b,#322a25)]" />
+                )}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
                   <div className="text-center p-6">
                     <WandSparkles className="mx-auto mb-4 text-white" size={32} />
@@ -201,11 +237,11 @@ export function Studio() {
           </div>
 
           {concept && (
-            <div className="fade-up">
+             <div className="fade-up">
               <div className="flex flex-col sm:flex-row gap-6 justify-between items-start border-b hairline pb-6">
                 <div>
                   <h2 className="serif text-3xl">Proposed Concept</h2>
-                  <p className="text-sm text-[hsl(var(--muted-foreground))] mt-2">Scope: {concept.scope} · Style: {concept.style} · {concept.afterImage ? 'Photoreal render' : 'Demo concept'}</p>
+                   <p className="text-sm text-[hsl(var(--muted-foreground))] mt-2">Scope: {concept.scope} · Style: {concept.style} · {concept.render?.isDemo ? 'Demo preview' : 'Photoreal Gemini render'}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button onClick={save} className="btn-primary text-xs px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium" data-testid="button-save-concept"><Bookmark size={14}/> Save to projects</button>
@@ -217,6 +253,18 @@ export function Studio() {
               </div>
               <PaletteStrip palette={concept.palette} />
               <ChangeSummary summary={concept.summary} scope={concept.scope} />
+            </div>
+          )}
+          {renderError && (
+            <div className="rounded-2xl border border-[hsl(var(--destructive)/.35)] bg-[hsl(var(--destructive)/.08)] p-5 text-sm" role="alert">
+              <div className="flex items-start gap-3">
+                <AlertCircle size={18} className="mt-0.5 shrink-0 text-[hsl(var(--destructive))]" />
+                <div>
+                  <p className="font-semibold">Photoreal render unavailable</p>
+                  <p className="mt-1 leading-relaxed text-[hsl(var(--muted-foreground))]">{renderError.message}</p>
+                  <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--muted-foreground))]">{renderError.code || 'PROVIDER_ERROR'}</p>
+                </div>
+              </div>
             </div>
           )}
         </section>
@@ -251,13 +299,13 @@ export function Studio() {
             <div className="mt-6">
               <label className="mono text-[10px] uppercase tracking-[.1em] muted">Room photograph</label>
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1 mobile-scroll">
-                 <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
                  <button onClick={() => fileInputRef.current?.click()} className="flex h-16 min-w-[82px] flex-col items-center justify-center gap-1 rounded-lg border border-dashed hairline text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--primary))] transition-colors" data-testid="button-upload-room">
                    <ImagePlus size={17} />
                    <span className="text-[10px]">Upload</span>
                  </button>
                  <div className="relative h-16 min-w-[82px] overflow-hidden rounded-lg border border-[hsl(var(--primary))]">
-                    <img src={beforeImage} className="absolute inset-0 w-full h-full object-cover" alt="Selected room" />
+                     {beforeImage ? <img src={beforeImage} className="absolute inset-0 w-full h-full object-cover" alt="Selected room" /> : <div className="h-full w-full bg-[linear-gradient(135deg,#765d4b,#322a25)]" />}
                  </div>
               </div>
             </div>
@@ -321,14 +369,14 @@ export function Studio() {
               ))}
             </div>
             
-            <button onClick={generate} disabled={generating} className="btn-primary mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-md" data-testid="button-generate">
+            <button onClick={generate} disabled={generating || !beforeImage.startsWith('data:image/')} className="btn-primary mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-md" data-testid="button-generate">
               <WandSparkles size={16} className={generating ? "animate-pulse" : ""} />
               {generating ? 'Composing your room...' : concept ? 'Regenerate concept' : 'Generate concept'}
             </button>
           </div>
           <p className="mt-4 flex items-center justify-center gap-2 text-[11px] muted">
             <Check size={13} className="text-[hsl(var(--accent))]" />
-            Your brief stays in this browser until you save it.
+             {beforeImage ? 'Your brief stays in this browser until you save it.' : 'Upload a room photo to enable photoreal generation.'}
           </p>
         </aside>
       </div>
