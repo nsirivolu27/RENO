@@ -1,0 +1,253 @@
+You are continuing Reno on GitHub:
+
+Repository: https://github.com/nsirivolu27/RENO
+Branch: replit-design-mvp
+Latest expected commit: 92d6f27 ("Wire photoreal after renderer")
+
+GOAL
+
+Make Reno’s real photorealistic before-and-after renovation workflow demonstrably work end to end in the running Replit preview.
+
+A user must be able to:
+
+1. Upload a real photograph of a room.
+2. Choose the room type and design style.
+3. Select Restyle or Renovate.
+4. Describe furniture, lighting, wall paint, flooring, fixtures, budget, and items that must remain.
+5. Send the original room photo and design instructions to a real image-editing provider.
+6. Receive a photorealistic redesigned version of that same room.
+7. Compare the exact original and generated result with the draggable before/after slider.
+8. Save the real result to Projects and open it in the client presentation view.
+
+The app must clearly distinguish a real AI result from a demo fallback. Never present a CSS illustration, stock photo, or unrelated image as an AI renovation.
+
+READ FIRST
+
+Inspect these existing files before changing anything:
+
+- artifacts/api-server/src/lib/renovation-renderer.ts
+- artifacts/api-server/src/lib/demo-provider.ts
+- artifacts/api-server/src/routes/concepts.ts
+- artifacts/api-server/src/routes/projects.ts
+- artifacts/reno-web/src/lib/providers.ts
+- artifacts/reno-web/src/pages/Studio.tsx
+- artifacts/reno-web/src/components/studio/ComparisonView.tsx
+- artifacts/reno-web/src/lib/concepts.ts
+
+Preserve the current warm, professional Reno design and existing routes.
+
+PROVIDER SETUP
+
+Use the existing backend provider architecture.
+
+Supported server secrets:
+
+- GEMINI_API_KEY
+- OPENAI_API_KEY
+- RENO_RENDER_PROVIDER=gemini, openai, or auto
+- GEMINI_IMAGE_MODEL, optional
+- OPENAI_IMAGE_MODEL, optional
+
+Do not place API keys in source code, frontend bundles, logs, localStorage, Git commits, screenshots, or API responses.
+
+Check whether a supported API key exists in Replit Secrets. If no key is configured, stop and tell me exactly which secret to add through Replit Secrets. Do not fabricate a successful render.
+
+Prefer the provider explicitly selected by RENO_RENDER_PROVIDER. In auto mode, try configured providers and report each provider failure internally without exposing secrets.
+
+REAL IMAGE REQUIREMENTS
+
+The provider must perform image-to-image editing using the uploaded photograph as the visual input. It must not generate a random room from text alone.
+
+The renovation prompt must instruct the model to:
+
+- Preserve the exact camera position, lens perspective, crop, room dimensions, ceiling height, structural layout, doors, windows, openings, and permanent architecture.
+- Keep requested must-retain elements unchanged.
+- Redesign furniture placement, lighting, wall paint and finishes, flooring and rugs, cabinetry, fixtures, window treatments, and decor according to the brief.
+- Maintain physically believable scale, perspective, material texture, reflections, daylight, artificial lighting, contact shadows, and object placement.
+- Produce one finished photorealistic interior photograph.
+- Avoid illustrations, sketches, mood boards, split screens, collages, CGI appearance, text, labels, logos, watermarks, people, and impossible architecture.
+
+Restyle mode may replace furniture, lighting, textiles, and decor but should preserve built surfaces.
+
+Renovate mode may additionally change paint, wall finishes, flooring, cabinetry, built-ins, countertops, plumbing fixtures, and architectural finishes while preserving the room’s structural geometry.
+
+HONEST RESULT STATES
+
+Implement clear result metadata returned by the API:
+
+- success: boolean
+- resultImageUrl: string only when a real image exists
+- provider: gemini or openai
+- model: actual model used
+- isDemo: boolean
+- requestId or renderId
+- errorCode when unsuccessful
+- safe user-facing error message
+
+The Studio result must display one of these states:
+
+1. “Photoreal AI render” with provider/model metadata when a real provider succeeds.
+2. “Demo preview only” when showing the abstract local concept.
+3. A visible actionable error when the provider fails.
+
+Never silently replace a failed real render with the demo visual while claiming generation succeeded.
+
+When the real provider fails, preserve the uploaded image and completed brief so the user can retry. Translate common failures into useful messages:
+
+- 401/403: API key invalid or model unavailable
+- 429: provider quota or rate limit reached
+- 413: image is too large
+- timeout: render took too long
+- unsupported image: request a JPEG, PNG, or WebP
+- provider returned no image: explain that no result was produced
+
+IMAGE HANDLING
+
+Before upload:
+
+- Accept JPEG, PNG, and WebP.
+- Correct mobile image orientation if needed.
+- Resize very large images while retaining good presentation quality.
+- Preserve the original aspect ratio.
+- Target approximately 1600–2048 pixels on the longest edge.
+- Avoid excessive base64 payloads.
+- Show the selected original photograph before generation.
+- Do not overwrite or mutate the original image.
+
+The generated result must use the same aspect ratio and comparison viewport as the original.
+
+BACKEND SAFETY
+
+- Keep provider calls server-side.
+- Validate all request fields.
+- Validate the data URL MIME type and base64 payload.
+- Set a reasonable request and provider timeout.
+- Do not decrement credits for failed generations.
+- Do not log full base64 images or API keys.
+- Return structured JSON errors.
+- Prevent arbitrary remote URL fetching.
+- Keep the demo renderer available only as a clearly labeled fallback.
+- Do not introduce destructive filesystem commands.
+- Do not modify unrelated repository files.
+
+STUDIO EXPERIENCE
+
+Keep the existing Studio interface but make the end-to-end status unmistakable:
+
+- Upload preview
+- Room selector
+- Style selector
+- Restyle/Renovate control
+- Detailed design brief
+- Generate button
+- Uploading status
+- Rendering status
+- Success status
+- Error and retry state
+- Draggable comparison slider
+- Before, After, and Compare controls on mobile
+- Download generated image
+- Regenerate
+- Save to Projects
+- Open Presentation
+
+Disable Generate while a request is active and prevent duplicate submissions.
+
+On screens around 390px wide, the user must be able to tap between Before and After and drag the comparison handle without horizontal overflow.
+
+PERSISTENCE
+
+When a real render is saved, persist:
+
+- Original room image
+- Real generated after image
+- Room
+- Style
+- Scope
+- Full brief
+- Provider
+- Model
+- Creation date
+- Rationale
+- Change summary
+- Material palette
+
+Projects, Concept Detail, Proposal, and Presentation must display the real after image whenever it exists. They must use the abstract demo visual only when the saved concept is explicitly marked as demo.
+
+END-TO-END PROOF
+
+Run a genuine test using a normal room photograph and a configured provider.
+
+Test brief:
+
+- Room: Living room
+- Style: Japandi
+- Scope: Renovate
+- Furniture: low-profile warm neutral sofa, two sculptural lounge chairs, oak media console
+- Lighting: warm recessed lighting and a paper pendant
+- Walls: warm off-white mineral paint
+- Flooring: natural white-oak flooring with a textured wool rug
+- Fixtures: simple black and brushed-brass accents
+- Must keep: every window, doorway, wall opening, room dimensions, and camera angle
+
+Verify all of the following:
+
+- The request reaches the API server.
+- A real provider is called.
+- The provider receives both the source image and prompt.
+- A new image is returned.
+- The returned image is visibly derived from the uploaded room.
+- The before/after slider uses the exact uploaded original and actual generated result.
+- Provider/model metadata is accurate.
+- Saving and reloading retains both images.
+- Projects and Presentation show the same real result.
+- Download produces the actual generated image.
+- No API key appears in browser network responses or JavaScript.
+- No console errors occur.
+- Mobile at 390px has no horizontal overflow.
+
+If quota prevents the real test, report that as blocked. Include the exact provider status and safe error message. Do not mark the test successful and do not substitute a demo result.
+
+VERIFICATION
+
+Run the repository’s available commands, including:
+
+- dependency installation
+- frontend typecheck
+- backend typecheck
+- production build
+- tests
+- local or Replit preview
+
+Fix errors introduced by this work. Do not hide failures by deleting tests or weakening TypeScript.
+
+GIT
+
+Work only on replit-design-mvp.
+
+Before editing:
+
+- Run git status.
+- Pull the latest remote branch.
+- Preserve all unrelated work.
+- Do not force-push.
+- Do not rewrite history.
+
+After successful verification, make a focused commit and push it to replit-design-mvp so PR #1 updates.
+
+FINAL REPORT
+
+Report:
+
+- Provider and exact model successfully tested
+- Whether the test used a real API call
+- What room image and brief were tested
+- Evidence that the result was based on the source image
+- API response shape without any secrets or image base64
+- Routes and files changed
+- Typecheck, build, and test results
+- Mobile verification result
+- Remaining limitations
+- Commit hash and GitHub branch URL
+
+The task is not complete merely because the interface renders. It is complete only when a genuine source photograph produces a genuine photorealistic after image, or when you honestly identify the external provider/quota condition blocking that proof.
