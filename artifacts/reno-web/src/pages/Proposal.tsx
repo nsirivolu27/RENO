@@ -106,7 +106,7 @@ export function Proposal({ projects, concepts }: { projects: Project[], concepts
               </div>
 
               <div className="relative aspect-[16/10] md:aspect-[21/9] w-full overflow-hidden rounded-2xl border hairline shadow-xl print:shadow-none print:break-inside-avoid">
-                 <ComparisonView beforeImage={concept.beforeImage} afterImage={concept.afterImage} afterComponent={<DemoAfterVisual concept={concept} />} />
+                  <ComparisonView beforeImage={concept.beforeImage} afterImage={concept.afterImage} afterComponent={concept.render?.isDemo ? <DemoAfterVisual concept={concept} /> : undefined} />
               </div>
 
               <div className="mt-12 grid gap-10 md:grid-cols-[1.5fr_1fr] print:break-inside-avoid">
