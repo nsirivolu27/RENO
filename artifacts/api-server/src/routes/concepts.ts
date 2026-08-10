@@ -25,11 +25,20 @@ router.post("/concepts", async (req, res): Promise<void> => {
     return;
   }
 
-  const concept = generateDemoConcept(body.data, null, Date.now());
-  const resultImageUrl = await renderRenovationAfterImage(body.data);
-  if (resultImageUrl) {
-    concept.resultImageUrl = resultImageUrl;
+  const render = await renderRenovationAfterImage(body.data);
+  if (!render.success || !render.resultImageUrl) {
+    res.status(502).json({
+      error: render.message || "Photoreal render failed",
+      code: render.errorCode || "PROVIDER_ERROR",
+      provider: render.provider,
+      model: render.model,
+      renderId: render.renderId,
+    });
+    return;
   }
+  const concept = generateDemoConcept(body.data, null, Date.now());
+  concept.resultImageUrl = render.resultImageUrl;
+  concept.render = render;
   addConcept(null, concept);
   res.status(201).json(GenerateConceptResponse.parse(concept));
 });
