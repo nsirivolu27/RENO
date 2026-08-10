@@ -39,6 +39,19 @@ export function Present({ concepts }: { concepts: Concept[] }) {
     downloadAnchorNode.remove();
   };
 
+  const handleDownloadImage = () => {
+    if (!concept.afterImage) {
+      toast({ title: 'No after image available', description: 'Generate a photoreal concept before downloading an image.' });
+      return;
+    }
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.href = concept.afterImage;
+    downloadAnchorNode.download = `reno-after-${concept.room.toLowerCase().replace(/\s+/g, '-')}.png`;
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))] pb-20 print:bg-white print:text-black">
       {/* Top Bar - Hidden in Print */}
@@ -59,6 +72,9 @@ export function Present({ concepts }: { concepts: Concept[] }) {
           <button onClick={handleDownloadJson} className="flex h-8 items-center gap-2 rounded-md border hairline px-3 text-xs hover:bg-[hsl(var(--secondary))] transition-colors" data-testid="button-download-json">
             <Download size={13} /> <span className="hidden sm:inline">Data</span>
           </button>
+          <button onClick={handleDownloadImage} disabled={!concept.afterImage} className="flex h-8 items-center gap-2 rounded-md border hairline px-3 text-xs hover:bg-[hsl(var(--secondary))] transition-colors disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-download-after">
+            <Download size={13} /> <span className="hidden sm:inline">After image</span>
+          </button>
           <button onClick={() => window.print()} className="btn-primary flex h-8 items-center gap-2 rounded-md px-3 text-xs font-medium" data-testid="button-print">
             <Printer size={13} /> Print
           </button>
@@ -71,7 +87,7 @@ export function Present({ concepts }: { concepts: Concept[] }) {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <Pill accent>Concept Direction</Pill>
-              <span className="text-xs font-mono uppercase tracking-widest text-[hsl(var(--primary))] print:text-black">Demo Concept</span>
+               <span className="text-xs font-mono uppercase tracking-widest text-[hsl(var(--primary))] print:text-black">{concept.render?.isDemo ? 'Demo preview' : 'Photoreal Gemini render'}</span>
             </div>
             <h1 className="serif text-5xl md:text-7xl leading-[0.9] italic print:text-black">{concept.title}</h1>
             <p className="mt-4 text-sm muted print:text-gray-600">
@@ -86,7 +102,7 @@ export function Present({ concepts }: { concepts: Concept[] }) {
 
         {/* Large Before/After */}
         <div className="relative aspect-[16/10] md:aspect-[21/9] w-full overflow-hidden rounded-2xl border hairline bg-[#776657] shadow-xl print:shadow-none print:break-inside-avoid">
-           <ComparisonView beforeImage={concept.beforeImage} afterImage={concept.afterImage} afterComponent={<DemoAfterVisual concept={concept} />} />
+           <ComparisonView beforeImage={concept.beforeImage} afterImage={concept.afterImage} afterComponent={concept.render?.isDemo ? <DemoAfterVisual concept={concept} /> : undefined} />
         </div>
 
         {/* Rationale & Palette */}
