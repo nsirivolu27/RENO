@@ -62,8 +62,9 @@ export function ProjectDetail({ concepts, projects, onRemoveConcept }: { concept
                     <Link href={`/concepts/${concept.id}`} className="block relative aspect-[4/3] overflow-hidden shrink-0">
                        {concept.beforeImage && <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 opacity-80" style={{ backgroundImage: `url(${concept.beforeImage})` }} />}
                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                       <div className="absolute left-4 top-4">
-                         {concept.favorite && <span className="bg-[#ecbf7d] text-black px-2 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md shadow-md">Favorite</span>}
+                        <div className="absolute left-4 top-4 flex items-center gap-2">
+                          {concept.render?.isDemo && <span className="rounded-md border border-white/30 bg-black/35 px-2 py-1 text-[10px] uppercase tracking-wider text-white backdrop-blur-sm">Demo preview</span>}
+                          {concept.favorite && <span className="bg-[#ecbf7d] text-black px-2 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md shadow-md">Favorite</span>}
                        </div>
                        <div className="absolute bottom-4 left-4 right-4 text-white">
                          <span className="mono text-[10px] uppercase tracking-[0.1em]">{concept.style}</span>
