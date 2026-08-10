@@ -18,7 +18,7 @@ export function ConceptCard({ concept, projects, onFavorite, onDelete, onAttach 
     <Link href={`/concepts/${concept.id}`} className="block relative aspect-[1.32/1] overflow-hidden shrink-0">
       <div className={concept.image ? `room-image ${concept.image} absolute inset-0 transition-transform duration-500 group-hover:scale-105` : "absolute inset-0 transition-transform duration-500 group-hover:scale-105 bg-black/20"} style={bgStyle} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-      <div className="absolute left-4 top-4"><Pill accent>{concept.room}</Pill></div>
+       <div className="absolute left-4 top-4 flex items-center gap-2"><Pill accent>{concept.room}</Pill>{concept.render?.isDemo && <Pill>demo preview</Pill>}</div>
       <div className="absolute inset-x-4 bottom-4 flex items-center justify-between text-white drop-shadow-md">
         <span className="mono text-[10px] uppercase tracking-[.1em] font-medium">Concept {concept.id.replace('c-','')}</span>
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/25 backdrop-blur-md transition-transform group-hover:translate-x-1"><ArrowRight size={13} /></span>
