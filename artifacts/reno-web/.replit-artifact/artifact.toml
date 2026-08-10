@@ -1,0 +1,29 @@
+kind = "web"
+previewPath = "/"
+title = "Reno Interior Studio"
+description = "A polished interior design studio for homeowners and renovation professionals to upload room photos, craft structured design briefs, generate before-and-after concepts, and organize client-ready projects."
+version = "1.0.0"
+id = "artifacts/reno-web"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18654
+
+[services.development]
+run = "pnpm --filter @workspace/reno-web run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/reno-web", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/reno-web/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18654"
+BASE_PATH = "/"
+VITE_API_BASE_URL = "/"

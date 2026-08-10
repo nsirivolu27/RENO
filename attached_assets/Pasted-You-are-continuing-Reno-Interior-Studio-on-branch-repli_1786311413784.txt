@@ -1,0 +1,183 @@
+You are continuing Reno Interior Studio on branch `replit-design-mvp`.
+
+Repo:
+https://github.com/nsirivolu27/RENO
+
+CURRENT STATE
+The After experience is now built:
+- Studio upload flow works
+- Demo concept generation works
+- Before/after comparison slider works
+- Change summary works
+- Palette strip works
+- Concepts save to localStorage
+- /projects shows saved concepts
+- Mobile 390px has been tested
+- Demo output is clearly labeled as demo-only
+
+NEXT GOAL
+Build the client presentation layer.
+
+Reno should now let a renovator generate a concept, save it, and then show a clean client-facing presentation that feels like a mini proposal.
+
+This presentation mode should answer:
+- What did the room look like before?
+- What is the proposed concept?
+- What exactly changes?
+- What stays unchanged?
+- What materials/finishes are being recommended?
+- Why does this design direction fit the client brief?
+
+BUILD THIS NEXT
+
+1. Presentation View
+Add a dedicated presentation route or view, for example:
+
+/present/:conceptId
+
+or a full-screen modal from Studio/Projects.
+
+It should show:
+- Reno branding
+- client-ready title
+- room + style + scope
+- large before/after comparison
+- design direction summary
+- materials palette
+- change summary
+- generated date
+- “Demo concept” badge if demo-only
+- footer note like:
+  “Concept preview for discussion. Final scope, dimensions, materials, and pricing require contractor verification.”
+
+No app controls should distract from the presentation.
+This should feel like something a renovator can turn toward a client on a tablet.
+
+2. Project Concepts Page Upgrade
+Improve `/projects` so saved concepts feel organized.
+
+Each saved concept card should include:
+- thumbnail of before/after or after concept
+- room
+- style
+- scope
+- created date
+- favorite toggle
+- open presentation button
+- delete button
+
+Add:
+- empty state
+- favorite concepts section or filter
+- count of saved concepts
+- clear all demo concepts button with confirmation
+
+Keep localStorage for now.
+
+3. Client Notes / Rationale
+For every generated concept, create a short “Design rationale” section.
+
+It should be generated from the selected style, room, scope, and brief.
+
+Examples:
+- Japandi:
+  “This direction keeps the room calm and open while adding warmer wood tones, softer lighting, and lower-profile furniture.”
+- Luxury:
+  “This concept uses contrast, richer materials, and layered lighting to make the room feel more tailored and premium.”
+- Coastal:
+  “This direction brightens the space with breathable fabrics, pale woods, and relaxed finishes.”
+
+Show this rationale in:
+- Studio result panel
+- Saved concept detail/presentation
+- Project card preview if space allows
+
+4. Export / Share Basics
+Add simple client-demo export actions:
+
+- Print presentation
+  - Use `window.print()`
+  - Add print CSS so the presentation prints cleanly on white background
+  - Hide app navigation/buttons in print
+  - One concept per printout
+
+- Copy presentation link
+  - For now, copy the local route URL
+  - Show a friendly copied state
+
+- Download concept data
+  - Export saved concept as JSON
+  - Filename like `reno-concept-living-room-japandi.json`
+
+No backend sharing yet.
+
+5. Better Demo Concept Visual
+Improve the demo After visual so it feels less placeholder-like.
+
+Keep it honest as demo-only, but make it more polished:
+- stronger room composition
+- better furniture silhouettes
+- more obvious lighting changes
+- walls/flooring variation by style
+- small decor details
+- must preserve a sense of the original room proportions
+- no generic blank cards
+
+The visual should respond to:
+- style
+- scope
+- room type
+- some brief fields if possible
+
+6. Real Provider Integration Prep
+Do not fully wire a paid provider yet, but prepare the structure:
+
+Create a clear interface/type like:
+ConceptRenderer or RenderProvider
+
+It should allow two modes:
+- demo renderer
+- future AI renderer
+
+Add TODO comments only where useful:
+- where provider image generation would be called
+- how the after image URL/base64 would replace DemoAfterVisual
+
+Do not add API keys yet in this task.
+
+7. Mobile Presentation
+At 390px:
+- presentation route must be usable
+- before/after should stack or toggle gracefully
+- buttons must not overflow
+- print/copy/download actions should be accessible but not dominate
+
+8. Accessibility / Quality
+- Buttons have accessible labels
+- Images have meaningful alt text
+- No horizontal scroll at 390px
+- No console errors
+- Loading and empty states look intentional
+
+VERIFY
+Before finishing:
+- Generate a concept
+- Save it
+- Open `/projects`
+- Open presentation view
+- Test favorite/delete
+- Test print button opens print dialog
+- Test copy link
+- Test JSON download
+- Refresh page and confirm saved concept persists
+- Check mobile 390px
+- Run typecheck/build/tests if scripts exist
+
+REPORT BACK
+When done:
+- list changed files
+- describe presentation view
+- describe projects page improvements
+- describe export/share behavior
+- note what is still demo-only
+- include commit hash pushed to `replit-design-mvp`

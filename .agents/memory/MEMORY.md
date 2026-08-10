@@ -1,0 +1,1 @@
+- [GitHub push via Git Data API](github-push-via-api.md) — gitPush callback lacks credentials here; push by replaying local tree through the GitHub REST Git Data API (no force, fast-forward refs).

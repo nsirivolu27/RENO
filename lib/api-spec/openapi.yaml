@@ -1,0 +1,469 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: projects
+    description: Client projects and saved concepts
+  - name: concepts
+    description: AI renovation concepts
+  - name: studio
+    description: Studio overview and generation
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /studio/summary:
+    get:
+      operationId: getStudioSummary
+      tags: [studio]
+      summary: Get studio summary
+      description: Returns the counts and recent activity needed for the studio overview.
+      responses:
+        "200":
+          description: Studio summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudioSummary"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List projects
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: favorite
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Project list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /projects/{projectId}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project with its concepts
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        "200":
+          description: Project detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update a project
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /projects/{projectId}/concepts:
+    post:
+      operationId: generateProjectConcept
+      tags: [concepts]
+      summary: Generate a concept inside a project
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConceptGenerateInput"
+      responses:
+        "201":
+          description: Generated concept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Concept"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /concepts:
+    post:
+      operationId: generateConcept
+      tags: [concepts]
+      summary: Generate a concept without a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConceptGenerateInput"
+      responses:
+        "201":
+          description: Generated concept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Concept"
+  /concepts/{conceptId}:
+    get:
+      operationId: getConcept
+      tags: [concepts]
+      summary: Get a concept
+      parameters:
+        - $ref: "#/components/parameters/ConceptId"
+      responses:
+        "200":
+          description: Concept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Concept"
+        "404":
+          description: Concept not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /concepts/{conceptId}/favorite:
+    patch:
+      operationId: toggleConceptFavorite
+      tags: [concepts]
+      summary: Set a concept favorite state
+      parameters:
+        - $ref: "#/components/parameters/ConceptId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoriteInput"
+      responses:
+        "200":
+          description: Updated concept
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Concept"
+        "404":
+          description: Concept not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    ConceptId:
+      name: conceptId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        provider:
+          type: string
+        model:
+          type: [string, "null"]
+        renderId:
+          type: string
+      required:
+        - error
+    Brief:
+      type: object
+      properties:
+        furnitureLayout:
+          type: string
+        lighting:
+          type: string
+        walls:
+          type: string
+        flooring:
+          type: string
+        fixtures:
+          type: string
+        budget:
+          type: string
+        mustKeep:
+          type: string
+      required:
+        - furnitureLayout
+        - lighting
+        - walls
+        - flooring
+        - fixtures
+        - budget
+        - mustKeep
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        clientName:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        conceptCount:
+          type: number
+        favoriteCount:
+          type: number
+        concepts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Concept"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - clientName
+        - location
+        - conceptCount
+        - favoriteCount
+        - concepts
+        - createdAt
+        - updatedAt
+    ProjectInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        clientName:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+      required:
+        - name
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        clientName:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+    Concept:
+      type: object
+      properties:
+        id:
+          type: string
+        projectId:
+          type: ["string", "null"]
+        title:
+          type: string
+        roomType:
+          type: string
+        style:
+          type: string
+        mode:
+          type: string
+          enum: [restyle, renovate]
+        sourceImageUrl:
+          type: string
+        resultImageUrl:
+          type: string
+        status:
+          type: string
+          enum: [completed]
+        isFavorite:
+          type: boolean
+        brief:
+          $ref: "#/components/schemas/Brief"
+        render:
+          $ref: "#/components/schemas/RenderMetadata"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - projectId
+        - title
+        - roomType
+        - style
+        - mode
+        - sourceImageUrl
+        - resultImageUrl
+        - status
+        - isFavorite
+        - brief
+        - render
+        - createdAt
+    RenderMetadata:
+      type: object
+      properties:
+        success:
+          type: boolean
+        resultImageUrl:
+          type: [string, "null"]
+        provider:
+          type: string
+          enum: [gemini, openai, none]
+        model:
+          type: [string, "null"]
+        isDemo:
+          type: boolean
+        renderId:
+          type: string
+        errorCode:
+          type: string
+        message:
+          type: string
+      required:
+        - success
+        - resultImageUrl
+        - provider
+        - model
+        - isDemo
+        - renderId
+    ConceptGenerateInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        roomType:
+          type: string
+          minLength: 1
+        style:
+          type: string
+          minLength: 1
+        mode:
+          type: string
+          enum: [restyle, renovate]
+        sourceImageUrl:
+          type: string
+        renderSourceImageUrl:
+          type: string
+        brief:
+          $ref: "#/components/schemas/Brief"
+      required:
+        - roomType
+        - style
+        - mode
+        - sourceImageUrl
+        - brief
+    FavoriteInput:
+      type: object
+      properties:
+        isFavorite:
+          type: boolean
+      required:
+        - isFavorite
+    StudioSummary:
+      type: object
+      properties:
+        projectCount:
+          type: number
+        conceptCount:
+          type: number
+        favoriteCount:
+          type: number
+        recentConcepts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Concept"
+      required:
+        - projectCount
+        - conceptCount
+        - favoriteCount
+        - recentConcepts
+
