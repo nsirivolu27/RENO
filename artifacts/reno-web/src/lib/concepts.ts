@@ -42,6 +42,18 @@ export interface Concept {
   summary: ConceptSummary;
   palette: PaletteSwatch[];
   rationale: string;
+  render?: ConceptRenderMetadata;
+}
+
+export interface ConceptRenderMetadata {
+  success: boolean;
+  resultImageUrl: string | null;
+  provider: 'gemini' | 'openai' | 'none';
+  model: string | null;
+  isDemo: boolean;
+  renderId: string;
+  errorCode?: string;
+  message?: string;
 }
 
 export const STYLE_OPTIONS: StyleOption[] = [
@@ -247,8 +259,8 @@ export function clearDemoConceptsLocally() {
 }
 
 export const SEED_CONCEPTS: Concept[] = [
-  { id: 'c-104', title: 'The quiet corner', client: 'Maya & Theo', room: 'Living room', style: 'Warm minimal', scope: 'Restyle', date: 'Feb 18, 2025', createdAt: 0, favorite: true, image: 'after', beforeImage: '', budget: '$18–24k', brief: {} as any, summary: STYLE_DATA['Warm minimal'].summaries as any, palette: STYLE_DATA['Warm minimal'].palette, rationale: STYLE_DATA['Warm minimal'].rationale },
-  { id: 'c-103', title: 'Sunday light', client: 'North & Pine', room: 'Kitchen', style: 'Scandinavian', scope: 'Renovate', date: 'Feb 12, 2025', createdAt: 0, favorite: false, image: 'loft', beforeImage: '', budget: '$32–40k', brief: {} as any, summary: STYLE_DATA['Scandinavian'].summaries as any, palette: STYLE_DATA['Scandinavian'].palette, rationale: STYLE_DATA['Scandinavian'].rationale },
-  { id: 'c-102', title: 'A room to exhale', client: 'Elena Rodriguez', room: 'Bedroom', style: 'Warm minimal', scope: 'Restyle', date: 'Jan 29, 2025', createdAt: 0, favorite: true, image: 'studio', beforeImage: '', budget: '$14–18k', brief: {} as any, summary: STYLE_DATA['Warm minimal'].summaries as any, palette: STYLE_DATA['Warm minimal'].palette, rationale: STYLE_DATA['Warm minimal'].rationale },
-  { id: 'c-101', title: 'After the rain', client: 'Oak Street Studio', room: 'Entryway', style: 'Industrial', scope: 'Restyle', date: 'Jan 21, 2025', createdAt: 0, favorite: false, image: 'before', beforeImage: '', budget: '$8–12k', brief: {} as any, summary: STYLE_DATA['Industrial'].summaries as any, palette: STYLE_DATA['Industrial'].palette, rationale: STYLE_DATA['Industrial'].rationale },
+  { id: 'c-104', title: 'The quiet corner', client: 'Maya & Theo', room: 'Living room', style: 'Warm minimal', scope: 'Restyle', date: 'Feb 18, 2025', createdAt: 0, favorite: true, image: 'after', beforeImage: '', budget: '$18–24k', brief: {} as any, summary: STYLE_DATA['Warm minimal'].summaries as any, palette: STYLE_DATA['Warm minimal'].palette, rationale: STYLE_DATA['Warm minimal'].rationale, render: { success: true, resultImageUrl: null, provider: 'none', model: null, isDemo: true, renderId: 'seed-demo-104' } },
+  { id: 'c-103', title: 'Sunday light', client: 'North & Pine', room: 'Kitchen', style: 'Scandinavian', scope: 'Renovate', date: 'Feb 12, 2025', createdAt: 0, favorite: false, image: 'loft', beforeImage: '', budget: '$32–40k', brief: {} as any, summary: STYLE_DATA['Scandinavian'].summaries as any, palette: STYLE_DATA['Scandinavian'].palette, rationale: STYLE_DATA['Scandinavian'].rationale, render: { success: true, resultImageUrl: null, provider: 'none', model: null, isDemo: true, renderId: 'seed-demo-103' } },
+  { id: 'c-102', title: 'A room to exhale', client: 'Elena Rodriguez', room: 'Bedroom', style: 'Warm minimal', scope: 'Restyle', date: 'Jan 29, 2025', createdAt: 0, favorite: true, image: 'studio', beforeImage: '', budget: '$14–18k', brief: {} as any, summary: STYLE_DATA['Warm minimal'].summaries as any, palette: STYLE_DATA['Warm minimal'].palette, rationale: STYLE_DATA['Warm minimal'].rationale, render: { success: true, resultImageUrl: null, provider: 'none', model: null, isDemo: true, renderId: 'seed-demo-102' } },
+  { id: 'c-101', title: 'After the rain', client: 'Oak Street Studio', room: 'Entryway', style: 'Industrial', scope: 'Restyle', date: 'Jan 21, 2025', createdAt: 0, favorite: false, image: 'before', beforeImage: '', budget: '$8–12k', brief: {} as any, summary: STYLE_DATA['Industrial'].summaries as any, palette: STYLE_DATA['Industrial'].palette, rationale: STYLE_DATA['Industrial'].rationale, render: { success: true, resultImageUrl: null, provider: 'none', model: null, isDemo: true, renderId: 'seed-demo-101' } },
 ];
