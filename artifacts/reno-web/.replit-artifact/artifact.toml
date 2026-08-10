@@ -26,3 +26,4 @@ to = "/index.html"
 [services.env]
 PORT = "18654"
 BASE_PATH = "/"
+VITE_API_BASE_URL = "/"
