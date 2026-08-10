@@ -31,6 +31,14 @@ export function generateDemoConcept(
     resultImageUrl: "",
     status: "completed",
     isFavorite: false,
+    render: {
+      success: true,
+      resultImageUrl: "",
+      provider: "none",
+      model: null,
+      isDemo: false,
+      renderId: "",
+    },
     brief: normalizedBrief(input.brief),
     createdAt: new Date(),
   };
