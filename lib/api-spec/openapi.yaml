@@ -249,6 +249,14 @@ components:
       properties:
         error:
           type: string
+        code:
+          type: string
+        provider:
+          type: string
+        model:
+          type: [string, "null"]
+        renderId:
+          type: string
       required:
         - error
     Brief:
@@ -360,6 +368,8 @@ components:
           type: boolean
         brief:
           $ref: "#/components/schemas/Brief"
+        render:
+          $ref: "#/components/schemas/RenderMetadata"
         createdAt:
           type: string
           format: date-time
@@ -375,7 +385,35 @@ components:
         - status
         - isFavorite
         - brief
+        - render
         - createdAt
+    RenderMetadata:
+      type: object
+      properties:
+        success:
+          type: boolean
+        resultImageUrl:
+          type: [string, "null"]
+        provider:
+          type: string
+          enum: [gemini, openai, none]
+        model:
+          type: [string, "null"]
+        isDemo:
+          type: boolean
+        renderId:
+          type: string
+        errorCode:
+          type: string
+        message:
+          type: string
+      required:
+        - success
+        - resultImageUrl
+        - provider
+        - model
+        - isDemo
+        - renderId
     ConceptGenerateInput:
       type: object
       properties:
@@ -392,6 +430,8 @@ components:
           type: string
           enum: [restyle, renovate]
         sourceImageUrl:
+          type: string
+        renderSourceImageUrl:
           type: string
         brief:
           $ref: "#/components/schemas/Brief"
