@@ -19,4 +19,6 @@ export * from './listProjectsParams';
 export * from './project';
 export * from './projectInput';
 export * from './projectUpdate';
+export * from './renderMetadata';
+export * from './renderMetadataProvider';
 export * from './studioSummary';
