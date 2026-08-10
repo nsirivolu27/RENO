@@ -1,7 +1,8 @@
-import { useState, useRef, ChangeEvent } from 'react';
+import { useState, useRef, ChangeEvent, useEffect } from 'react';
 import { ImagePlus, MoreHorizontal, Check, WandSparkles, Bookmark, ExternalLink } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Concept, ConceptBrief, generateDemoConcept, STYLE_OPTIONS, StyleOption, saveConceptLocally } from '@/lib/concepts';
+import { Project, getProjects, attachConceptToProject } from '@/lib/projects';
 import { ComparisonView } from '@/components/studio/ComparisonView';
 import { DemoAfterVisual } from '@/components/studio/DemoAfterVisual';
 import { PaletteStrip } from '@/components/studio/PaletteStrip';
@@ -10,6 +11,9 @@ import { Pill } from '@/components/ui/pill';
 import { useToast } from '@/hooks/use-toast';
 
 export function Studio() {
+  const [projects] = useState<Project[]>(() => getProjects());
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+
   const [room, setRoom] = useState('Living room');
   const [style, setStyle] = useState<StyleOption>('Warm minimal');
   const [mode, setMode] = useState<'Restyle' | 'Renovate'>('Restyle');
@@ -23,10 +27,32 @@ export function Studio() {
   const [concept, setConcept] = useState<Concept | null>(null);
   
   const [view, setView] = useState<'compare' | 'before' | 'after'>('compare');
-  const [presentation, setPresentation] = useState(false);
 
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    const savedId = sessionStorage.getItem('reno_studio_project');
+    if (savedId) {
+      setSelectedProjectId(savedId);
+      sessionStorage.removeItem('reno_studio_project');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      const proj = projects.find(p => p.id === selectedProjectId);
+      if (proj) {
+        setRoom(proj.roomType);
+        setBrief(prev => ({
+          ...prev,
+          keep: proj.mustKeep,
+          budget: proj.budgetRange,
+          furniture: prev.furniture || proj.notes
+        }));
+      }
+    }
+  }, [selectedProjectId, projects]);
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -51,18 +77,22 @@ export function Studio() {
   const generate = () => {
     setGenerating(true);
     window.setTimeout(() => {
+      const proj = projects.find(p => p.id === selectedProjectId);
+      const clientName = proj ? proj.clientName : 'Demo Client';
+      const budget = brief.budget || (proj ? proj.budgetRange : 'TBD');
+
       const result = generateDemoConcept({ style, scope: mode, brief });
       const newConcept: Concept = {
         id: `c-${Math.floor(Math.random()*10000)}`,
         title: `${style} ${room}`,
-        client: 'Demo Client',
+        client: clientName,
         room,
         style,
         scope: mode,
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         createdAt: Date.now(),
         favorite: false,
-        budget: brief.budget || 'TBD',
+        budget,
         beforeImage,
         brief: brief as ConceptBrief,
         summary: result.summary,
@@ -78,14 +108,18 @@ export function Studio() {
   const save = () => {
     if (concept) {
       saveConceptLocally(concept);
+      if (selectedProjectId) {
+        attachConceptToProject(selectedProjectId, concept.id);
+      }
       toast({ title: 'Concept saved', description: 'Available in your Projects.' });
-      setLocation('/projects');
+      setLocation(selectedProjectId ? `/projects/${selectedProjectId}` : '/projects');
     }
   };
 
   const present = () => {
     if (concept) {
       saveConceptLocally(concept);
+      if (selectedProjectId) attachConceptToProject(selectedProjectId, concept.id);
       setLocation(`/present/${concept.id}`);
     }
   };
@@ -165,6 +199,25 @@ export function Studio() {
         {/* Right Side - Form */}
         <aside className="order-1 lg:order-2">
           <div className="rounded-2xl border hairline bg-[hsl(var(--card))] p-5 shadow-sm sticky top-24">
+            
+            {/* Project Context */}
+            <div className="mb-6 pb-6 border-b hairline">
+              <label className="mono text-[10px] uppercase tracking-[.1em] muted block mb-2">Project Context</label>
+              <select 
+                className="input-dark w-full rounded-lg px-3 py-2.5 text-sm" 
+                value={selectedProjectId} 
+                onChange={e => {
+                  if (e.target.value === 'new') setLocation('/projects/new');
+                  else setSelectedProjectId(e.target.value);
+                }}
+                data-testid="select-project-context"
+              >
+                <option value="">No project (Standalone concept)</option>
+                {projects.map(p => <option key={p.id} value={p.id}>{p.clientName} - {p.projectName}</option>)}
+                <option value="new">+ Create new project</option>
+              </select>
+            </div>
+
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold">The canvas</h2>
               <button className="muted" data-testid="button-brief-menu"><MoreHorizontal size={18} /></button>
@@ -188,7 +241,7 @@ export function Studio() {
               <div>
                 <label className="mono text-[10px] uppercase tracking-[.1em] muted">Room type</label>
                 <select className="input-dark mt-2 w-full rounded-lg px-3 py-2.5 text-sm" value={room} onChange={e => setRoom(e.target.value)} data-testid="select-room-type">
-                  <option>Living room</option><option>Kitchen</option><option>Bedroom</option><option>Sunroom</option><option>Bathroom</option>
+                  <option>Living room</option><option>Kitchen</option><option>Bedroom</option><option>Sunroom</option><option>Bathroom</option><option>Entryway</option>
                 </select>
               </div>
               <div>

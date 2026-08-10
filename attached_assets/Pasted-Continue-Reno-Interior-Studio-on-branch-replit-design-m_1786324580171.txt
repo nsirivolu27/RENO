@@ -1,0 +1,239 @@
+Continue Reno Interior Studio on branch `replit-design-mvp`.
+
+Repo:
+https://github.com/nsirivolu27/RENO
+
+Current state:
+- Studio generation flow works
+- Demo After visual works
+- Before/after comparison works
+- Concepts save to localStorage
+- /projects is upgraded
+- /present/:conceptId exists
+- Print/copy/download actions work
+- Presentation view is mobile-safe
+- ConceptRenderer interface exists for future AI provider
+
+NEXT GOAL
+Build the client/project intake layer so Reno feels like a professional renovation workflow, not just individual concepts.
+
+A renovator should be able to create a client project, attach multiple concepts to that project, and present a project-level proposal.
+
+PRODUCT STORY
+A renovator meets a client.
+They create a project:
+- client name
+- property / room name
+- room type
+- goals
+- budget range
+- timeline
+- must-keep constraints
+- notes
+
+Then they generate multiple concepts and save them under that project.
+Later they open a project proposal view to show the best concepts together.
+
+BUILD FEATURES
+
+1. Project Data Model
+Extend localStorage storage in `src/lib/concepts.ts` or a new `src/lib/projects.ts`.
+
+Create a local Project model:
+
+Project:
+- id
+- clientName
+- projectName
+- propertyAddress optional
+- roomType
+- goals
+- budgetRange
+- timeline
+- mustKeep
+- notes
+- createdAt
+- updatedAt
+- conceptIds: string[]
+
+Keep storage localStorage only for now.
+
+Support:
+- create project
+- update project
+- delete project
+- list projects
+- attach concept to project
+- remove concept from project
+
+Do not add backend or auth.
+
+2. Project Intake UI
+Add a project intake/create flow.
+
+Either:
+- `/projects/new`
+or
+- a modal from `/projects`
+
+Fields:
+- Client name
+- Project name
+- Property / address optional
+- Room type
+- Goals
+- Budget range
+- Timeline
+- Must keep unchanged
+- Notes
+
+Keep it premium and client-friendly.
+Avoid looking like a database form.
+
+Use copy like:
+- “Client brief”
+- “Project goals”
+- “Budget direction”
+- “Timeline”
+- “Constraints”
+
+3. Studio Project Context
+In Studio, add a “Project context” selector.
+
+User can:
+- choose an existing project
+- create a new project quickly
+- generate a concept under the selected project
+
+When a project is selected:
+- show project/client name
+- prefill or suggest room type, goals, must-keep, notes
+- saved concept should automatically attach to that project
+- presentation should still work for individual concept
+
+4. Project Detail Page
+Add route:
+
+`/projects/:projectId`
+
+Show:
+- project/client info
+- goals/budget/timeline/must-keep
+- saved concepts in that project
+- favorite concepts highlighted
+- button to open each concept presentation
+- button to generate another concept for this project
+- delete/remove concept from project
+
+Empty state:
+“Generate the first concept for this project.”
+
+5. Project Proposal View
+Add route:
+
+`/proposal/:projectId`
+
+This is the professional project-level presentation.
+
+It should show:
+- Reno branding
+- client/project name
+- project brief
+- favorite concepts first
+- all selected concepts with before/after, rationale, palette, and change summary
+- contractor-verification footer
+- print button
+- copy proposal link button
+- download project JSON button
+
+Print CSS:
+- white background
+- hide controls
+- project cover first
+- one concept per page if practical
+
+6. Concept Attach / Move
+From `/projects` and Studio result actions:
+- allow assigning a saved concept to a project
+- if no project exists, prompt to create one
+- show which project a concept belongs to, if any
+
+Keep UX simple. No heavy management UI.
+
+7. Estimate Preview
+Add a lightweight, clearly caveated estimate preview for each concept.
+
+This is not real pricing. It should say:
+“Early planning estimate. Final pricing requires contractor verification.”
+
+Estimate should vary by:
+- Restyle vs Renovate
+- Room type
+- Budget direction
+- Style
+
+Show:
+- low/high range
+- line categories:
+  - furniture/decor
+  - lighting
+  - flooring
+  - wall treatments
+  - fixtures/built-ins
+  - labor/installation
+
+For Restyle, omit or mark built-surface categories as unchanged.
+For Renovate, include surfaces/fixtures/labor.
+
+Keep this as local deterministic logic in a file like `src/lib/estimates.ts`.
+
+8. Mobile Requirements
+At 390px:
+- project intake usable
+- project detail readable
+- proposal view presentable
+- no horizontal scroll
+- action buttons wrap cleanly
+
+9. Accessibility / Tests
+Add data-testid attributes for:
+- create project
+- project form submit
+- project selector
+- attach concept
+- open proposal
+- print proposal
+- download project JSON
+
+Verify:
+- create project
+- select project in Studio
+- generate concept
+- save concept to project
+- open project detail
+- open proposal
+- print/copy/download actions work
+- refresh and project persists
+- delete project/concept works
+- mobile 390px no horizontal scroll
+- typecheck/build/tests pass if scripts exist
+
+DO NOT
+- add auth
+- add payments
+- add real provider API keys
+- force push
+- overwrite main
+- remove existing concept presentation work
+- use emojis in UI
+
+REPORT
+When done, report:
+- changed files
+- project model details
+- project intake UX
+- Studio project-context behavior
+- project proposal behavior
+- estimate preview behavior
+- what remains local/demo-only
+- commit hash pushed to `replit-design-mvp`
