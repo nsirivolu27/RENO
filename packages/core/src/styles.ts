@@ -122,6 +122,37 @@ export function buildPrompt(req: GenerateRequest): string {
     parts.push(style.prompt);
   }
 
+  const design = req.design;
+  if (design) {
+    const brief: string[] = [];
+    if (design.furniture?.trim()) {
+      brief.push(`Furniture plan: ${design.furniture.trim()}`);
+    }
+    if (design.lighting?.trim()) {
+      brief.push(`Lighting design: ${design.lighting.trim()}`);
+    }
+    if (design.walls?.trim()) {
+      brief.push(`Walls, paint, and wall treatments: ${design.walls.trim()}`);
+    }
+    if (design.flooring?.trim()) {
+      brief.push(`Flooring and rugs: ${design.flooring.trim()}`);
+    }
+    if (design.fixtures?.trim()) {
+      brief.push(`Fixtures, hardware, cabinetry, and built-ins: ${design.fixtures.trim()}`);
+    }
+    if (design.budget?.trim()) {
+      brief.push(`Budget direction: ${design.budget.trim()}`);
+    }
+    if (design.mustKeep?.trim()) {
+      brief.push(`Must keep unchanged: ${design.mustKeep.trim()}`);
+    }
+    if (brief.length > 0) {
+      parts.push(
+        `Follow this interior designer brief. ${brief.join(". ")}. Make the result cohesive, livable, correctly scaled, and commercially presentable.`
+      );
+    }
+  }
+
   const notes = req.notes?.trim();
   if (notes) {
     parts.push(`Additional direction: ${notes}`);

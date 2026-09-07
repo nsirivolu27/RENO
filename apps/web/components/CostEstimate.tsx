@@ -22,7 +22,7 @@ const TIER_LABEL: Record<BudgetTier, string> = {
 
 /**
  * Itemized cost range for a concept, from the vendor catalog.
- * Always shows the "indicative, not a quote" caveat — a number in front of a
+ * Always shows the "indicative, not a quote" caveat. A number in front of a
  * client without that line is a liability.
  */
 export default function CostEstimate({
@@ -80,7 +80,7 @@ export default function CostEstimate({
     return (
       <div className="estimate-panel">
         <p className="estimate-note">
-          {loading ? "Pricing this concept…" : "No estimate available."}
+          {loading ? "Pricing this concept..." : "No estimate available."}
         </p>
       </div>
     );
@@ -128,8 +128,8 @@ export default function CostEstimate({
             <span>
               {line.name}
               <span className="line-vendor">
-                {line.vendorName} · {line.quantity}{" "}
-                {line.unit === "each" ? "×" : line.unit}
+                {line.vendorName} - {line.quantity}{" "}
+                {line.unit === "each" ? "x" : line.unit}
               </span>
             </span>
             <span className="line-price">
@@ -142,7 +142,7 @@ export default function CostEstimate({
       <p className="estimate-note">
         {estimate.notes.join(" ")}
         {source === "sample" &&
-          " Prices come from Reno's sample catalog — load your own vendor list before quoting."}
+          " Prices come from Reno's sample catalog. Load your own vendor list before quoting."}
       </p>
     </div>
   );

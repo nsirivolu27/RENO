@@ -1,6 +1,16 @@
 /** How aggressively a generation may change the space. */
 export type GenerateMode = "restyle" | "renovate";
 
+export interface DesignBrief {
+  furniture?: string;
+  lighting?: string;
+  walls?: string;
+  flooring?: string;
+  fixtures?: string;
+  mustKeep?: string;
+  budget?: string;
+}
+
 /** A single image-to-image generation request. */
 export interface GenerateRequest {
   /** Base64 data URL of the source photo. */
@@ -12,6 +22,8 @@ export interface GenerateRequest {
   mode: GenerateMode;
   /** Optional extra design direction appended to the prompt. */
   notes?: string;
+  /** Structured interior-design direction for professional renovation demos. */
+  design?: DesignBrief;
 }
 
 /** The result of a successful generation. */

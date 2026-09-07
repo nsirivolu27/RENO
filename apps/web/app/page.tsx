@@ -86,7 +86,7 @@ export default function LandingPage() {
         <h2 id="proof-heading">One photo in, a client-ready concept out</h2>
         <p className="section-sub">
           Upload a real photo of a room or workspace. Reno keeps the
-          architecture — camera angle, windows, dimensions — and redesigns
+          architecture, camera angle, windows and dimensions, then redesigns
           everything else.
         </p>
 
@@ -103,7 +103,7 @@ export default function LandingPage() {
               </figure>
             </div>
             <div className="panel-caption">
-              <span>Living room — Japandi restyle</span>
+              <span>Living room - Japandi restyle</span>
               <span>Same walls, windows, and camera angle</span>
             </div>
           </div>
@@ -115,14 +115,14 @@ export default function LandingPage() {
                 <li>
                   <span className="step-n">1</span>
                   <span>
-                    <b>Create a demo project</b> — client name, space type,
+                    <b>Create a demo project</b> with client name, space type,
                     materials and constraints.
                   </span>
                 </li>
                 <li>
                   <span className="step-n">2</span>
                   <span>
-                    <b>Generate concepts in Studio</b> — project direction is
+                    <b>Generate concepts in Studio</b>. Project direction is
                     applied to every render automatically.
                   </span>
                 </li>
@@ -136,14 +136,14 @@ export default function LandingPage() {
                 <li>
                   <span className="step-n">4</span>
                   <span>
-                    <b>Present or print</b> a clean demo view — export the
+                    <b>Present or print</b> a clean demo view. Export the
                     project as JSON or a proposal-ready PDF.
                   </span>
                 </li>
               </ol>
             </div>
             <div className="panel-caption">
-              <span>Everything stays on your device — local-first</span>
+              <span>Everything stays on your device. Local-first</span>
             </div>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function LandingPage() {
         <div className="stat-row">
           <div className="stat">
             <div className="stat-big">3 free renders</div>
-            <div className="stat-label">to try hosted mode — no account</div>
+            <div className="stat-label">to try hosted mode, no account</div>
           </div>
           <div className="stat">
             <div className="stat-big">10 design styles</div>
@@ -168,7 +168,7 @@ export default function LandingPage() {
         <h2 id="how-heading">How it works</h2>
         <p className="section-sub">
           Restyle swaps furniture and decor while keeping every built surface.
-          Renovate goes further — flooring, walls, cabinetry, and finishes.
+          Renovate goes further with flooring, walls, cabinetry, and finishes.
         </p>
         <div className="how-grid">
           <div className="how-step">
@@ -198,7 +198,7 @@ export default function LandingPage() {
         <h2 id="pricing-heading">Open core, honest pricing</h2>
         <p className="section-sub">
           Hosted mode uses our provider keys and credits. Or self-host with
-          your own API key — free, unlimited, no account.
+          your own API key: free, unlimited, no account.
         </p>
         <div className="pricing-grid">
           <div className="price-card">

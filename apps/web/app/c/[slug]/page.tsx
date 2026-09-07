@@ -30,7 +30,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const company = await repo.getCompanyBySlug(slug);
   if (!company) return { title: "Company not found" };
-  const title = `${company.name} — work and pricing`;
+  const title = `${company.name} - work and pricing`;
   const description =
     company.tagline ?? `Design and renovation work by ${company.name}.`;
   return {
@@ -53,7 +53,7 @@ export default async function CompanyShowcasePage({ params }: ShowcaseProps) {
       <header className="demo-header">
         <div className="share-kicker">
           {TRADE_LABEL[company.trade] ?? "Design studio"}
-          {company.region ? ` · ${company.region}` : ""}
+          {company.region ? ` - ${company.region}` : ""}
         </div>
         <h1>{company.name}</h1>
         {company.tagline && <p className="meta">{company.tagline}</p>}
@@ -94,7 +94,7 @@ export default async function CompanyShowcasePage({ params }: ShowcaseProps) {
             <article key={offering.id} className="render-card concept">
               <div className="concept-head">
                 <span className="concept-index">
-                  {String(index + 1).padStart(2, "0")} ·{" "}
+                  {String(index + 1).padStart(2, "0")} -{" "}
                   {offering.mode === "renovate" ? "Renovation" : "Restyle"}
                 </span>
                 {offering.priceLow !== undefined &&

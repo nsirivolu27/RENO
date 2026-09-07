@@ -672,6 +672,41 @@ p {
   font-weight: 700;
 }
 
+.design-brief-panel {
+  margin: 1.2rem 0;
+  padding: 1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+}
+
+.design-brief-head {
+  margin-bottom: 0.95rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.design-brief-head h2 {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.design-brief-head p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.brief-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
 .result-meta {
   display: flex;
   gap: 0.75rem;
@@ -723,6 +758,11 @@ p {
 
 /* ---------- Before/after slider ---------- */
 
+.ba-frame {
+  display: grid;
+  gap: 0.65rem;
+}
+
 .ba-slider {
   position: relative;
   aspect-ratio: 4 / 3;
@@ -757,7 +797,7 @@ p {
 }
 
 .ba-slider .ba-handle::after {
-  content: "◂ ▸";
+  content: "< >";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -769,6 +809,7 @@ p {
   padding: 0.25rem 0.4rem;
   border-radius: 999px;
   white-space: nowrap;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
 }
 
 .ba-slider input[type="range"] {
@@ -802,6 +843,70 @@ p {
 .ba-slider .ba-tag.after {
   right: 0.6rem;
   color: var(--accent);
+}
+
+.ba-view-before .ba-before {
+  clip-path: inset(0 0 0 0);
+}
+
+.ba-view-before .ba-after,
+.ba-view-after .ba-before,
+.ba-view-before .ba-handle,
+.ba-view-after .ba-handle {
+  display: none;
+}
+
+.ba-view-before .ba-tag.before,
+.ba-view-after .ba-tag.after {
+  top: 0.7rem;
+  bottom: auto;
+}
+
+.ba-tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ba-mode-tabs,
+.ba-presets {
+  display: inline-flex;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--border);
+}
+
+.ba-mode-tabs button,
+.ba-presets button {
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border: 0;
+  background: var(--bg-inset);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ba-mode-tabs button:hover:not(:disabled),
+.ba-presets button:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--bg-raised);
+}
+
+.ba-mode-tabs button.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.ba-presets button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
 }
 
 /* ---------- Projects ---------- */
@@ -954,6 +1059,7 @@ p {
 @media (max-width: 560px) {
   .how-grid,
   .pricing-grid,
+  .brief-grid,
   .stat-row {
     grid-template-columns: 1fr;
   }
@@ -1287,6 +1393,20 @@ p {
   }
 }
 
+/* ---------- Company dashboard ---------- */
+
+.offering-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.offering-head h3 {
+  margin: 0;
+}
+
 /* ===========================================================
    Editorial layer — makes client-facing pages read like a
    design studio document rather than a generic AI dashboard.
@@ -1617,5 +1737,561 @@ p {
 
   .estimate-lines li {
     border-bottom: 1px solid #e2e2e2;
+  }
+}
+
+/* ---------- Company workroom polish ---------- */
+
+.company-page {
+  max-width: 1160px;
+}
+
+.company-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 1.5rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+  padding: 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(255, 120, 73, 0.11), transparent 42%),
+    var(--bg-raised);
+}
+
+.company-hero h1,
+.company-overview h2,
+.company-form-card h2,
+.company-section-card h2,
+.client-note h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.company-hero h1 {
+  max-width: 760px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 0.7rem;
+}
+
+.company-hero p {
+  max-width: 68ch;
+  color: var(--text-dim);
+  font-size: 1rem;
+}
+
+.company-eyebrow {
+  display: inline-flex;
+  margin-bottom: 0.45rem;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.company-hero-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.company-hero-card {
+  display: grid;
+  gap: 0.75rem;
+  align-content: center;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: rgba(11, 13, 17, 0.42);
+  padding: 1rem;
+}
+
+.company-hero-card div {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.company-hero-card b,
+.company-hero-card span,
+.company-share-strip b,
+.company-share-strip span {
+  display: block;
+}
+
+.company-hero-card span,
+.company-share-strip span {
+  color: var(--text-dim);
+  font-size: 0.86rem;
+}
+
+.company-picker {
+  max-width: 380px;
+}
+
+.company-setup-grid,
+.company-work-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.35fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.company-form-card,
+.company-section-card,
+.client-note,
+.company-overview,
+.company-share-strip {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+}
+
+.company-form-card,
+.company-section-card,
+.client-note {
+  padding: 1.25rem;
+}
+
+.form-intro {
+  margin-bottom: 1.1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.form-intro h2,
+.client-note h3,
+.company-section-card h2 {
+  font-size: 1.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.form-intro p,
+.client-note p,
+.company-overview p,
+.friendly-empty p {
+  color: var(--text-dim);
+}
+
+.client-note {
+  min-height: 100%;
+  background:
+    linear-gradient(180deg, rgba(255, 120, 73, 0.08), transparent 55%),
+    var(--bg-raised);
+}
+
+.company-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.company-overview h2 {
+  font-size: 1.6rem;
+}
+
+.company-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(86px, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--border);
+}
+
+.company-metrics .stat {
+  padding: 0.85rem 0.9rem;
+}
+
+.company-share-strip {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.7fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.alert-warn {
+  background: rgba(255, 185, 93, 0.1);
+  border: 1px solid rgba(255, 185, 93, 0.65);
+  color: #ffd7a8;
+}
+
+.company-price-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.1fr;
+  gap: 0.75rem;
+}
+
+.company-list-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.subtle-count {
+  color: var(--text-dim);
+  font-size: 0.84rem;
+}
+
+.friendly-empty {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  background: var(--bg-inset);
+}
+
+.friendly-empty b {
+  color: var(--text);
+}
+
+.friendly-empty p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+.offering-card,
+.lead-card {
+  padding: 1rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.offering-card:first-of-type,
+.lead-card:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.offering-card:last-child,
+.lead-card:last-child {
+  padding-bottom: 0;
+}
+
+.gentle-warning {
+  margin: 0.75rem 0;
+  padding: 0.65rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--text-dim);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 900px) {
+  .company-hero,
+  .company-setup-grid,
+  .company-work-grid,
+  .company-overview,
+  .company-share-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .company-price-row,
+  .company-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Studio document finish ---------- */
+
+a:focus-visible,
+.btn:focus-visible,
+.chip:focus-visible,
+.style-card:focus-visible,
+.seg button:focus-visible,
+.fav-btn:focus-visible,
+.dropzone:focus-visible,
+.share-link-row input:focus-visible,
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn,
+.chip,
+.style-card,
+.seg button,
+.fav-btn {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 120ms ease;
+}
+
+.btn {
+  min-height: 2.35rem;
+}
+
+.btn:active:not(:disabled),
+.chip:active:not(:disabled),
+.style-card:active:not(:disabled),
+.seg button:active:not(:disabled),
+.fav-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.chip:hover:not(:disabled),
+.style-card:hover:not(:disabled),
+.seg button:hover:not(:disabled),
+.fav-btn:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.field input:hover:not(:disabled),
+.field select:hover:not(:disabled),
+.field textarea:hover:not(:disabled),
+.share-link-row input:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled,
+.share-link-row input:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.studio-head {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.studio-head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3vw, 2.55rem);
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.studio-grid {
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+}
+
+.studio-panel,
+.project-card,
+.share-panel,
+.estimate-panel,
+.render-card,
+.company-form-card,
+.company-section-card,
+.client-note,
+.company-overview,
+.company-share-strip {
+  box-shadow: inset 0 1px 0 var(--rule);
+}
+
+.dropzone {
+  min-height: 170px;
+  display: grid;
+  place-items: center;
+}
+
+.style-card {
+  min-height: 76px;
+}
+
+.style-card .pref {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.result,
+.canvas-placeholder {
+  min-height: 380px;
+}
+
+.empty-state {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  background: var(--bg-inset);
+}
+
+.project-card {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.project-card:hover {
+  border-color: var(--border-strong);
+}
+
+.project-card .meta {
+  line-height: 1.55;
+}
+
+.public-share {
+  max-width: 1040px;
+}
+
+.public-share .demo-header {
+  max-width: 760px;
+  margin-right: auto;
+}
+
+.demo-direction {
+  max-width: 68ch;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+}
+
+.render-gallery {
+  align-items: start;
+}
+
+.render-card.concept {
+  break-inside: avoid;
+}
+
+.concept-head {
+  min-height: 2.2rem;
+}
+
+.concept-title {
+  line-height: 1.2;
+}
+
+.spec-list > div {
+  grid-template-columns: 6.25rem minmax(0, 1fr);
+}
+
+.estimate-lines li {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.estimate-total,
+.line-price {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.company-hero {
+  background: var(--bg-raised);
+  box-shadow: inset 0 1px 0 var(--rule);
+}
+
+.company-hero-card {
+  background: transparent;
+}
+
+.company-hero-card div {
+  padding: 0.8rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+}
+
+.company-hero-card div:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.alert-warn,
+.gentle-warning {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.company-metrics .stat {
+  background: var(--bg-inset);
+}
+
+.offering-card,
+.lead-card {
+  display: grid;
+  gap: 0.55rem;
+}
+
+@media (min-width: 901px) {
+  .studio-grid > .studio-panel:first-child {
+    position: sticky;
+    top: 5.25rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .studio-grid,
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .render-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .spec-list > div {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .container {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .nav {
+    gap: 0.75rem;
+  }
+
+  .nav-links {
+    gap: 0.75rem;
+  }
+
+  .nav-links a {
+    font-size: 0.86rem;
+  }
+
+  .studio-head {
+    align-items: flex-start;
+  }
+
+  .studio-panel,
+  .project-card,
+  .share-panel,
+  .estimate-panel,
+  .company-form-card,
+  .company-section-card,
+  .client-note {
+    padding: 1rem;
+  }
+
+  .dropzone,
+  .result,
+  .canvas-placeholder {
+    min-height: 260px;
   }
 }

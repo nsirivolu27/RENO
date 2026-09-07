@@ -14,7 +14,7 @@ function escapeXml(value: string): string {
 /** Clamp a single line so long text can't overflow the board width. */
 function clamp(value: string, max: number): string {
   const clean = value.replace(/\s+/g, " ").trim();
-  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+  return clean.length > max ? `${clean.slice(0, max - 3)}...` : clean;
 }
 
 function styleColors(styleId: string): [string, string, string, string] {

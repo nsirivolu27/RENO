@@ -7,7 +7,7 @@ import {
   getProvider,
   providers,
 } from "@reno/core";
-import type { GenerateMode, GenerateRequest } from "@reno/core";
+import type { DesignBrief, GenerateMode, GenerateRequest } from "@reno/core";
 import {
   attachVisitorCookie,
   getRemainingCredits,
@@ -43,12 +43,34 @@ interface GenerateBody {
   room?: unknown;
   mode?: unknown;
   notes?: unknown;
+  design?: unknown;
   provider?: unknown;
   apiKey?: unknown;
 }
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function asDesignBrief(value: unknown): DesignBrief | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return undefined;
+  }
+  const raw = value as Record<string, unknown>;
+  const design: DesignBrief = {};
+  for (const key of [
+    "furniture",
+    "lighting",
+    "walls",
+    "flooring",
+    "fixtures",
+    "mustKeep",
+    "budget",
+  ] as const) {
+    const text = asString(raw[key]);
+    if (text) design[key] = text.slice(0, 600);
+  }
+  return Object.keys(design).length > 0 ? design : undefined;
 }
 
 /**
@@ -125,12 +147,14 @@ export async function POST(req: NextRequest) {
   }
 
   const notes = asString(body.notes);
+  const design = asDesignBrief(body.design);
   const request: GenerateRequest = {
     image,
     style,
     room,
     mode,
     ...(notes ? { notes } : {}),
+    ...(design ? { design } : {}),
   };
   const prompt = buildPrompt(request);
 

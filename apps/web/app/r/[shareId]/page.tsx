@@ -64,10 +64,10 @@ export default async function PublicSharePage({ params }: SharePageProps) {
         <div className="share-kicker">Design concept presentation</div>
         <h1>{project.name}</h1>
         <p className="meta">
-          {project.clientName ? `Prepared for ${project.clientName} · ` : ""}
-          {project.room} · {project.renders.length} concept
+          {project.clientName ? `Prepared for ${project.clientName} - ` : ""}
+          {project.room} - {project.renders.length} concept
           {project.renders.length === 1 ? "" : "s"}
-          {favorites > 0 ? ` · ${favorites} recommended` : ""}
+          {favorites > 0 ? ` - ${favorites} recommended` : ""}
         </p>
 
         {project.designDirection && (

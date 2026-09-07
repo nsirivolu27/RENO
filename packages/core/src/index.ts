@@ -2,6 +2,7 @@ export type {
   GenerateMode,
   GenerateRequest,
   GenerateResult,
+  DesignBrief,
   Provider,
   DataUrlParts,
 } from "./types";

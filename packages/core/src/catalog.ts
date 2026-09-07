@@ -265,7 +265,7 @@ export function estimateForConcept(input: EstimateInput): CostEstimate {
   const notes = [
     "Indicative range from catalog pricing, not a quote.",
     mode === "restyle"
-      ? "Furnishings and decor only — no construction, surfaces or fixtures."
+      ? "Furnishings and decor only. No construction, surfaces or fixtures."
       : "Includes surfaces, fixtures and an allowance for labor.",
     "Final pricing depends on site conditions, measurements and vendor availability.",
   ];

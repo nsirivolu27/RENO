@@ -107,7 +107,7 @@ export default function ProjectDemo({ id }: { id: string }) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
     } catch {
-      setShareError("Couldn't copy automatically — select the link and copy it.");
+      setShareError("Couldn't copy automatically. Select the link and copy it.");
     }
   };
 
@@ -135,7 +135,7 @@ export default function ProjectDemo({ id }: { id: string }) {
   };
 
   if (!loaded) {
-    return <div className="container">Loading project…</div>;
+    return <div className="container">Loading project...</div>;
   }
 
   if (!project) {
@@ -145,7 +145,7 @@ export default function ProjectDemo({ id }: { id: string }) {
           <h3 style={{ color: "var(--text)" }}>Project not found</h3>
           <p>
             This project isn&apos;t in this browser&apos;s storage. It may have
-            been created on another device — import its JSON export instead.
+            been created on another device. Import its JSON export instead.
           </p>
           <Link href="/projects" className="btn">
             Back to projects
@@ -161,7 +161,7 @@ export default function ProjectDemo({ id }: { id: string }) {
     <div
       className={`container${favoritesOnly ? " print-favorites-only" : ""}`}
     >
-      {/* Printed proposal cover page — hidden on screen, first page in print. */}
+      {/* Printed proposal cover page. Hidden on screen, first page in print. */}
       <section className="print-cover" aria-hidden="true">
         <div className="print-cover-top">
           {project.proposal?.businessName && (
@@ -188,7 +188,7 @@ export default function ProjectDemo({ id }: { id: string }) {
           {project.proposal?.preparedBy && <div>{project.proposal.preparedBy}</div>}
           {project.proposal?.contact && <div>{project.proposal.contact}</div>}
           <div>
-            {new Date().toLocaleDateString()} ·{" "}
+            {new Date().toLocaleDateString()} -{" "}
             {favoritesOnly ? favorites : project.renders.length} concept
             {(favoritesOnly ? favorites : project.renders.length) === 1 ? "" : "s"}
           </div>
@@ -198,9 +198,9 @@ export default function ProjectDemo({ id }: { id: string }) {
       <header className="demo-header">
         <h1>{project.name}</h1>
         <p className="meta">
-          {project.clientName ? `Prepared for ${project.clientName} · ` : ""}
+          {project.clientName ? `Prepared for ${project.clientName} - ` : ""}
           {project.room}
-          {favorites > 0 ? ` · ★ ${favorites} favorite concept${favorites === 1 ? "" : "s"}` : ""}
+          {favorites > 0 ? ` - ${favorites} recommended concept${favorites === 1 ? "" : "s"}` : ""}
         </p>
 
         {project.designDirection && (
@@ -248,7 +248,7 @@ export default function ProjectDemo({ id }: { id: string }) {
             <div>
               <strong>Client proposal (print / PDF)</strong>
               <p className="hint" style={{ margin: "0.15rem 0 0" }}>
-                Adds a branded cover page. Print with Ctrl/Cmd+P → Save as PDF.
+                Adds a branded cover page. Print with Ctrl/Cmd+P, then save as PDF.
               </p>
             </div>
             <button
@@ -305,7 +305,7 @@ export default function ProjectDemo({ id }: { id: string }) {
                   onChange={(e) =>
                     setProposalState((p) => ({ ...p, contact: e.target.value }))
                   }
-                  placeholder="e.g. sam@novakreno.com · (555) 012-3456"
+                  placeholder="e.g. sam@novakreno.com - (555) 012-3456"
                 />
               </div>
               <div className="field">
@@ -338,14 +338,14 @@ export default function ProjectDemo({ id }: { id: string }) {
             <>
               <p className="hint">
                 A server-side snapshot of this project is public. Your editable
-                project stays in this browser — after saving new renders, use
+                project stays in this browser. After saving new renders, use
                 Update snapshot to refresh the public page.
               </p>
               {isLocalBaseUrl() && (
                 <div className="alert alert-error" role="status">
                   This link points at a local address, so it will only open on
                   this machine. Deploy Reno and set <code>NEXT_PUBLIC_APP_URL</code>{" "}
-                  before emailing it — see <code>docs/DEPLOY.md</code>.
+                  before emailing it. See <code>docs/DEPLOY.md</code>.
                 </div>
               )}
               <div className="share-link-row">
@@ -375,7 +375,7 @@ export default function ProjectDemo({ id }: { id: string }) {
                   onClick={createShare}
                   disabled={shareBusy}
                 >
-                  {shareBusy ? "Working…" : "Update snapshot"}
+                  {shareBusy ? "Working..." : "Update snapshot"}
                 </button>
                 <button
                   type="button"
@@ -400,7 +400,7 @@ export default function ProjectDemo({ id }: { id: string }) {
                 onClick={createShare}
                 disabled={shareBusy || project.renders.length === 0}
               >
-                {shareBusy ? "Publishing…" : "Create public share"}
+                {shareBusy ? "Publishing..." : "Create public share"}
               </button>
               {project.renders.length === 0 && (
                 <span className="hint">
@@ -450,7 +450,7 @@ export default function ProjectDemo({ id }: { id: string }) {
                       : "Mark as recommended"
                   }
                 >
-                  {r.favorite ? "★ Recommended" : "☆ Recommend"}
+                  {r.favorite ? "Recommended" : "Recommend"}
                 </button>
                 {r.favorite && (
                   <span className="concept-flag print-only">Recommended</span>
@@ -480,7 +480,7 @@ export default function ProjectDemo({ id }: { id: string }) {
                 {r.notes && <p className="render-notes">{r.notes}</p>}
                 <CostEstimate room={project.room} style={r.style} mode={r.mode} />
                 <p className="render-provenance no-print">
-                  {r.provider} · {r.model}
+                  {r.provider} - {r.model}
                 </p>
               </div>
             </article>

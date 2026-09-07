@@ -62,7 +62,7 @@ export default function EnquiryForm({
   if (state === "sent") {
     return (
       <div className="alert alert-ok" role="status">
-        Thanks — your enquiry is with {companyName}. They&apos;ll be in touch
+        Thanks. Your enquiry is with {companyName}. They&apos;ll be in touch
         using the details you provided.
       </div>
     );
@@ -143,7 +143,7 @@ export default function EnquiryForm({
         className="btn btn-primary"
         disabled={state === "sending"}
       >
-        {state === "sending" ? "Sending…" : "Send enquiry"}
+        {state === "sending" ? "Sending..." : "Send enquiry"}
       </button>
     </form>
   );

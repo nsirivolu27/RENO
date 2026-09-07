@@ -28,11 +28,28 @@ CompanyProfile   name, slug, trade, tagline, about, region, contacts, vendorId
 
 | Route | Who | Purpose |
 | --- | --- | --- |
+| `/for-companies` | Owner | Dashboard: create a company, draft/publish offerings, read leads. |
 | `GET/POST /api/companies` | Owner | List / create company profiles. |
+| `GET/PATCH /api/companies/:id` | Owner only | Read / edit the profile. |
 | `GET/POST /api/companies/:id/offerings` | Owner (drafts) / public (published) | Manage and read offerings. |
+| `PATCH/DELETE /api/companies/:id/offerings/:offeringId` | Owner only | Edit, publish, unpublish, delete. |
 | `POST /api/companies/:id/leads` | Public | Submit an enquiry. |
 | `GET /api/companies/:id/leads` | Owner only | The enquiry inbox. |
+| `PATCH /api/companies/:id/leads/:leadId` | Owner only | Move a lead: new → contacted → won/lost. |
 | `/c/:slug` | Public | The showcase page prospects see. |
+
+## The dashboard (`/for-companies`)
+
+Set up a company, then build offerings from work you've already done: the
+"Use a saved render" picker lists every render saved in your local Studio
+projects, and attaching one pulls its before/after images, room, style and
+mode into the offering. Add a title, summary, inclusions, price range and
+timeline, save as a draft, publish when ready.
+
+The dashboard also shows counts (published / drafts / new enquiries), the
+public page link with a copy button, a warning when that link is localhost-only,
+and the lead inbox with one-click status changes. Offerings without a visual are
+flagged — a prospect responds to a before/after, not to a paragraph.
 
 Ownership is the `reno_visitor` cookie, exactly like projects — see the
 limitations below.

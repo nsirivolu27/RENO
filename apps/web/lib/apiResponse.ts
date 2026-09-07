@@ -60,6 +60,21 @@ const STORE_ERRORS: Record<string, StoreErrorInfo> = {
     message: "This file does not look like a Reno project export.",
   },
   INVALID_BODY: { status: 400, message: "Request body must be JSON." },
+  COMPANY_NOT_FOUND: { status: 404, message: "Company not found." },
+  COMPANY_LIMIT_REACHED: {
+    status: 400,
+    message: "Company limit reached for this visitor.",
+  },
+  OFFERING_NOT_FOUND: { status: 404, message: "Offering not found." },
+  OFFERING_LIMIT_REACHED: {
+    status: 400,
+    message: "Offering limit reached for this company.",
+  },
+  LEAD_NOT_FOUND: { status: 404, message: "Lead not found." },
+  LEAD_LIMIT_REACHED: {
+    status: 400,
+    message: "Lead limit reached for this company.",
+  },
 };
 
 export interface ErrorEnvelope {

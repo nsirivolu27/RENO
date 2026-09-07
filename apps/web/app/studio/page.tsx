@@ -19,7 +19,7 @@ import { compressProjectImage, localProjectStore } from "@/lib/projectStore";
 
 const KEY_STORAGE = "reno_key";
 
-/** Presentational palette hints per style (UI only — prompts live in core). */
+/** Presentational palette hints per style. Prompts live in core. */
 const STYLE_SWATCHES: Record<string, [string, string, string]> = {
   "modern-minimal": ["#e8e6e1", "#8a8d93", "#b48a60"],
   scandinavian: ["#f2efe9", "#d9c7a7", "#7e93a8"],
@@ -56,6 +56,13 @@ function Studio() {
   const [mode, setMode] = useState<GenerateMode>("restyle");
   const [styleId, setStyleId] = useState<string>(STYLES[0]?.id ?? "modern-minimal");
   const [notes, setNotes] = useState("");
+  const [furniture, setFurniture] = useState("");
+  const [lighting, setLighting] = useState("");
+  const [walls, setWalls] = useState("");
+  const [flooring, setFlooring] = useState("");
+  const [fixtures, setFixtures] = useState("");
+  const [mustKeep, setMustKeep] = useState("");
+  const [budget, setBudget] = useState("balanced");
   const [providerId, setProviderId] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
@@ -184,6 +191,15 @@ function Studio() {
     const combinedNotes = [notes.trim(), projectDirection]
       .filter(Boolean)
       .join(". ");
+    const design = {
+      furniture,
+      lighting,
+      walls,
+      flooring,
+      fixtures,
+      mustKeep,
+      budget,
+    };
 
     try {
       const res = await fetch("/api/generate", {
@@ -195,6 +211,7 @@ function Studio() {
           room,
           mode,
           notes: combinedNotes || undefined,
+          design,
           provider: useProvider || undefined,
           apiKey: useKey || undefined,
         }),
@@ -431,7 +448,7 @@ function Studio() {
                         <i key={c} style={{ background: c }} />
                       ))}
                     </span>
-                    {preferred && <span className="pref">★ client preferred</span>}
+                    {preferred && <span className="pref">Client preferred</span>}
                   </button>
                 );
               })}
@@ -448,6 +465,100 @@ function Studio() {
               onChange={(e) => setNotes(e.target.value)}
             />
           </div>
+
+          <section className="design-brief-panel" aria-labelledby="design-brief-title">
+            <div className="design-brief-head">
+              <div>
+                <h2 id="design-brief-title">Interior design brief</h2>
+                <p>
+                  Use these fields when you want the render to feel like a real
+                  designer concept, not only a style transfer.
+                </p>
+              </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="furniture-input">Furniture and layout</label>
+              <textarea
+                id="furniture-input"
+                rows={2}
+                value={furniture}
+                onChange={(e) => setFurniture(e.target.value)}
+                placeholder="e.g. sectional facing TV, add two accent chairs, slim console, keep walking path open"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="lighting-input">Lighting design</label>
+              <textarea
+                id="lighting-input"
+                rows={2}
+                value={lighting}
+                onChange={(e) => setLighting(e.target.value)}
+                placeholder="e.g. recessed ceiling lights, warm floor lamp, pendant over dining area, no harsh blue light"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="walls-input">Paint, walls, and treatments</label>
+              <textarea
+                id="walls-input"
+                rows={2}
+                value={walls}
+                onChange={(e) => setWalls(e.target.value)}
+                placeholder="e.g. warm white paint, limewash accent wall, walnut slat panel behind TV"
+              />
+            </div>
+
+            <div className="brief-grid">
+              <div className="field">
+                <label htmlFor="flooring-input">Flooring and rugs</label>
+                <input
+                  id="flooring-input"
+                  value={flooring}
+                  onChange={(e) => setFlooring(e.target.value)}
+                  placeholder="e.g. white oak floor, large wool rug"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="fixtures-input">Fixtures and built-ins</label>
+                <input
+                  id="fixtures-input"
+                  value={fixtures}
+                  onChange={(e) => setFixtures(e.target.value)}
+                  placeholder="e.g. matte black hardware, floating media unit"
+                />
+              </div>
+            </div>
+
+            <div className="brief-grid">
+              <div className="field">
+                <label htmlFor="budget-input">Budget direction</label>
+                <select
+                  id="budget-input"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                >
+                  <option value="budget-conscious, accessible retail pieces">
+                    Budget-conscious
+                  </option>
+                  <option value="balanced">Balanced</option>
+                  <option value="premium materials and custom millwork">
+                    Premium
+                  </option>
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="keep-input">Must keep</label>
+                <input
+                  id="keep-input"
+                  value={mustKeep}
+                  onChange={(e) => setMustKeep(e.target.value)}
+                  placeholder="e.g. windows, sofa, TV location"
+                />
+              </div>
+            </div>
+          </section>
 
           <div className="field">
             <label htmlFor="provider-select">Provider</label>

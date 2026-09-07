@@ -105,7 +105,9 @@ assert(publicApi.body.project?.name === "Backend smoke", "public API returned wr
 const publicPage = await request(`/r/${shareId}`);
 assert(publicPage.res.status === 200, "public share page failed");
 assert(
-  typeof publicPage.body.raw === "string" && publicPage.body.raw.includes("Shared Reno demo"),
+  typeof publicPage.body.raw === "string" &&
+    publicPage.body.raw.includes("Backend smoke") &&
+    publicPage.body.raw.includes("Made with"),
   "public share page did not render expected content"
 );
 

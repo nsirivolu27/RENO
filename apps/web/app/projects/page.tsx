@@ -94,7 +94,7 @@ export default function ProjectsPage() {
         <div>
           <h1>Client demo projects</h1>
           <p style={{ color: "var(--text-dim)", margin: 0 }}>
-            Local-first — everything is stored in this browser. Export to move
+            Local-first. Everything is stored in this browser. Export to move
             or back up a project.
           </p>
         </div>
@@ -214,7 +214,7 @@ export default function ProjectsPage() {
         {/* -------- Project list -------- */}
         <div>
           {!loaded ? (
-            <div className="empty-state">Loading projects…</div>
+            <div className="empty-state">Loading projects...</div>
           ) : projects.length === 0 ? (
             <div className="empty-state">
               <h3 style={{ color: "var(--text)" }}>No projects yet</h3>
@@ -224,7 +224,7 @@ export default function ProjectsPage() {
               </p>
               <p>
                 Projects collect saved renders, client preferences, and design
-                direction — then present them as a clean demo.
+                direction, then present them as a clean demo.
               </p>
             </div>
           ) : (
@@ -232,16 +232,16 @@ export default function ProjectsPage() {
               <div key={p.id} className="project-card">
                 <h3>{p.name}</h3>
                 <p className="meta">
-                  {p.clientName ? `${p.clientName} · ` : ""}
-                  {p.room} · {p.renders.length} render
+                  {p.clientName ? `${p.clientName} - ` : ""}
+                  {p.room} - {p.renders.length} render
                   {p.renders.length === 1 ? "" : "s"}
                   {p.renders.some((r) => r.favorite)
-                    ? ` · ★ ${p.renders.filter((r) => r.favorite).length} favorite`
+                    ? ` - ${p.renders.filter((r) => r.favorite).length} recommended`
                     : ""}
                 </p>
                 {p.designDirection && (
                   <p className="meta" style={{ fontStyle: "italic" }}>
-                    “{p.designDirection}”
+                    "{p.designDirection}"
                   </p>
                 )}
                 <div className="actions">

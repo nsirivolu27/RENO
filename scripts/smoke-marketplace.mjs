@@ -157,10 +157,58 @@ check("drafts hidden from non-owners", publicList.body.offerings.length === 0);
 const ownerList = await request(`/api/companies/${companyId}/offerings`, {}, owner);
 check("owner sees drafts", ownerList.body.offerings.length === 1 && ownerList.body.canEdit === true);
 
-// Publish via the showcase page being reachable is enough for smoke purposes;
-// publishing uses the same store path exercised by unit tests.
+const offeringId = offering.body.offering.id;
+
+// A non-owner must not be able to publish someone else's offering.
+const hijack = await request(
+  `/api/companies/${companyId}/offerings/${offeringId}`,
+  { method: "PATCH", body: JSON.stringify({ status: "published" }) },
+  stranger
+);
+check("non-owner cannot edit an offering", hijack.status === 404, `${hijack.status}`);
+
+const publish = await request(
+  `/api/companies/${companyId}/offerings/${offeringId}`,
+  { method: "PATCH", body: JSON.stringify({ status: "published" }) },
+  owner
+);
+check("owner publishes offering", publish.status === 200 && publish.body.offering.status === "published");
+
+const nowPublic = await request(`/api/companies/${companyId}/offerings`, {}, stranger);
+check("published offering is publicly visible", nowPublic.body.offerings.length === 1);
+
+const unpublish = await request(
+  `/api/companies/${companyId}/offerings/${offeringId}`,
+  { method: "PATCH", body: JSON.stringify({ status: "draft" }) },
+  owner
+);
+check("owner can unpublish", unpublish.body.offering.status === "draft");
+const hiddenAgain = await request(`/api/companies/${companyId}/offerings`, {}, stranger);
+check("unpublished offering disappears publicly", hiddenAgain.body.offerings.length === 0);
+
+// Republish so the showcase has something to render.
+await request(
+  `/api/companies/${companyId}/offerings/${offeringId}`,
+  { method: "PATCH", body: JSON.stringify({ status: "published" }) },
+  owner
+);
+
 const showcase = await request(`/c/${slug}`);
 check("public showcase page renders", showcase.status === 200);
+
+const profileUpdate = await request(
+  `/api/companies/${companyId}`,
+  { method: "PATCH", body: JSON.stringify({ tagline: "Updated tagline" }) },
+  owner
+);
+check("owner updates company profile", profileUpdate.status === 200 && profileUpdate.body.company.tagline === "Updated tagline");
+
+const profileHijack = await request(
+  `/api/companies/${companyId}`,
+  { method: "PATCH", body: JSON.stringify({ tagline: "hijacked" }) },
+  stranger
+);
+check("non-owner cannot edit the profile", profileHijack.status === 404);
 
 // ---- Leads ---------------------------------------------------------------
 
@@ -187,5 +235,27 @@ check("owner reads the lead inbox", inbox.status === 200 && inbox.body.leads.len
 
 const stolen = await request(`/api/companies/${companyId}/leads`, {}, stranger);
 check("lead inbox is owner-only", stolen.status === 404, `${stolen.status}`);
+
+const leadId = inbox.body.leads[0].id;
+const moved = await request(
+  `/api/companies/${companyId}/leads/${leadId}`,
+  { method: "PATCH", body: JSON.stringify({ status: "contacted" }) },
+  owner
+);
+check("owner advances a lead", moved.status === 200 && moved.body.lead.status === "contacted");
+
+const badStatus = await request(
+  `/api/companies/${companyId}/leads/${leadId}`,
+  { method: "PATCH", body: JSON.stringify({ status: "banana" }) },
+  owner
+);
+check("lead status is validated", badStatus.status === 400);
+
+const leadHijack = await request(
+  `/api/companies/${companyId}/leads/${leadId}`,
+  { method: "PATCH", body: JSON.stringify({ status: "won" }) },
+  stranger
+);
+check("non-owner cannot move a lead", leadHijack.status === 404);
 
 console.log(`\nmarketplace: ${passed} checks passed against ${base}`);
