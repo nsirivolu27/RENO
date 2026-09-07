@@ -10,6 +10,16 @@ It serves two audiences with one engine: everyday users (homeowners, renters, of
 
 Repo: https://github.com/nsirivolu27/RENO
 
+> **Status: under development.** This is the `rebuild` branch and it is where Reno is actively
+> being built. Interfaces, routes, and the data model still change without notice, and `main`
+> carries the earlier scaffold. Do not treat anything here as stable, and do not merge this
+> branch into `main` without review.
+
+Reno is an independent product. It shares no code with the LLMM, LNKZ, or lnkz-mcp
+repositories, and the RSNA knee work lives only in
+[`nsirivolu27/rsna-knee-abnormality-detection`](https://github.com/nsirivolu27/rsna-knee-abnormality-detection).
+
+
 ## Quick start
 
 ```bash
