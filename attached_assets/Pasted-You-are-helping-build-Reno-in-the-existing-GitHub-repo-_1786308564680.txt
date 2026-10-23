@@ -1,0 +1,148 @@
+You are helping build Reno in the existing GitHub repo:
+
+https://github.com/nsirivolu27/RENO
+
+Reno is an MIT open-source AI renovation app for homeowners and renovation professionals. The product should let someone upload or take a photo of a residential or corporate space, describe the interior design changes they want, generate a realistic before/after renovation concept, save concepts into client projects, and present those concepts professionally.
+
+IMPORTANT
+Work in the existing repo only. Do not create a new app from scratch unless the repo is empty. Preserve existing behavior. Make small, reviewable commits. Do not overwrite unrelated work from Codex or Claude.
+
+CURRENT PRODUCT DIRECTION
+Reno should feel less like a generic AI dashboard and more like a polished interior design / renovation studio tool.
+
+Target users:
+1. Homeowners:
+   - Upload a room photo.
+   - Pick room type, style, restyle/renovate mode.
+   - Describe furniture, lighting, paint/walls, flooring, fixtures, and what must stay.
+   - Generate before/after concepts.
+   - Download or save results.
+
+2. Renovators / designers:
+   - Create client demo projects.
+   - Generate multiple concepts for the same space.
+   - Save, favorite, compare, export, and present before/after proposals.
+   - Use Reno during a client meeting, including on mobile.
+
+TECH CONSTRAINTS
+- Monorepo with npm workspaces.
+- Next.js 15 App Router web app in `apps/web`.
+- Expo mobile app in `apps/mobile`.
+- Shared TypeScript package in `packages/core`.
+- TypeScript strict mode.
+- Plain CSS only in `apps/web/app/globals.css`.
+- No Tailwind.
+- No UI framework.
+- No new dependencies unless absolutely necessary and explained.
+- Keep dark theme, but make it warmer and more premium.
+- Keep existing API routes and provider architecture.
+- BYO API key / self-host path must always work without paid Reno services.
+
+DESIGN REFERENCE
+Use this as inspiration, not a copy:
+https://dribbble.com/shots/27004179-Ai-Home-Interior-App-design-Design
+
+Visual direction:
+- Image-first interface.
+- Large before/after room preview.
+- Friendly but professional app-shell layout.
+- Warm dark interior-studio feel.
+- Clean cards/panels with good spacing.
+- Less “AI dashboard”, more “client-ready design studio”.
+- Strong mobile layout for demoing inside a house.
+
+BUILD PRIORITIES
+
+1. Fix local app polish
+- Make sure the web app loads styled correctly.
+- Avoid broken CSS/dev-server artifacts.
+- Verify `/`, `/studio`, `/projects`, `/projects/[id]`, `/r/[shareId]`, `/for-companies`.
+
+2. Improve Studio UX
+In `apps/web/app/studio/page.tsx` and `globals.css`:
+- Make the upload + before/after result area the visual center.
+- Keep controls clear and reachable.
+- Preserve the existing Interior Design Brief fields:
+  - Furniture and layout
+  - Lighting design
+  - Paint/walls/treatments
+  - Flooring/rugs
+  - Fixtures/built-ins
+  - Budget direction
+  - Must keep
+- Make the form feel like a designer intake, not a generic prompt box.
+- Make empty/loading/error states look intentional.
+
+3. Improve Before/After
+- Ensure the before/after comparison feels important.
+- Keep compare/before/after modes.
+- Make mobile before/after easy to present to a client.
+- No layout jump when images load.
+- Download/regenerate/save actions should be obvious.
+
+4. Improve Mobile Demo Flow
+In `apps/mobile/App.tsx`:
+- Keep Expo single-file app.
+- Improve the phone flow for a live house demo:
+  - Camera / library
+  - Room chips
+  - Style chips
+  - Restyle / Renovate toggle
+  - Designer brief inputs
+  - Demo / Gemini provider toggle
+  - Before/after result view
+- Make it feel polished enough to hand to a client.
+- Do not break API_URL constant at top.
+
+5. Backend / Prompt Quality
+In `packages/core` and `apps/web/app/api/generate/route.ts`:
+- Preserve provider architecture.
+- Keep structured design brief flowing into `buildPrompt`.
+- Make the prompt strongly describe real interior design changes:
+  - furniture placement
+  - lighting plan
+  - wall paint/materials
+  - flooring
+  - fixtures/cabinetry/built-ins
+  - must-keep constraints
+  - photorealism and architectural preservation
+- Do not break demo provider.
+- Do not break Gemini/OpenAI/Replicate providers.
+
+6. Professional Project Demo
+For project/share pages:
+- Make saved renders feel like a client proposal.
+- Before/after should be the hero.
+- Include concept metadata cleanly.
+- Preserve print/PDF behavior if it exists.
+- Do not break public share pages.
+
+VERIFY
+Run these before finishing:
+
+npm install
+npm run typecheck
+npm run build
+npm run smoke
+
+Also run the web app:
+
+npm run dev
+
+Then check:
+- http://127.0.0.1:3000/
+- http://127.0.0.1:3000/studio
+- Generate once with Demo provider.
+- Save a render into a project if available.
+- Open project/demo view.
+- Confirm before/after works.
+
+REPORT BACK
+When done, report:
+- files changed
+- what changed visually
+- what changed in backend/prompt behavior
+- what was verified
+- anything still not production-ready
+
+Do not force push. Do not delete unrelated files. Do not rewrite the repo history.

@@ -1,0 +1,198 @@
+You are continuing work on Reno Interior Studio.
+
+Current preview:
+https://asset-manager--sirivolun.replit.app
+
+Repo target:
+https://github.com/nsirivolu27/RENO
+
+GOAL
+Continue building Reno from the current Replit design into a real demo-ready AI renovation product. Keep the warm, premium, mobile-first interior studio look, but make the product more functional and closer to the existing Reno monorepo vision.
+
+Reno should let a homeowner or renovator:
+- upload/take a photo of a room
+- define the room type
+- choose restyle vs full renovation
+- pick a visual style
+- describe furniture, lighting, paint/walls, flooring, fixtures, and must-keep constraints
+- generate a before/after concept
+- save multiple concepts
+- present the result clearly to a client
+
+DESIGN DIRECTION
+Keep the current Replit UI direction:
+- warm dark brown/black interior-studio feel
+- large image-first cards
+- mobile-first layout
+- elegant serif headings
+- simple professional controls
+- not a generic AI dashboard
+- not overly “AI-looking”
+- suitable for showing to an actual client
+
+Use these as visual inspiration, not exact copies:
+https://dribbble.com/search/interior-app
+https://dribbble.com/shots/27004179-Ai-Home-Interior-App-design-Design
+
+IMPORTANT PRODUCT STANDARD
+This needs to feel like a design/renovation professional could open it during a home walkthrough and say:
+“Here’s the original room, here’s the proposed concept, here are the design choices, and here’s what we would change.”
+
+BUILD NEXT FEATURES
+
+1. Real Studio Flow
+Add or improve a main Studio flow with these sections:
+
+- Upload room photo
+  - drag/drop on desktop
+  - click/tap upload on mobile
+  - preview selected image clearly
+
+- Room type
+  - living room
+  - bedroom
+  - kitchen
+  - bathroom
+  - dining room
+  - home office
+  - kids room
+  - backyard/patio
+  - basement
+  - garage
+  - office lobby
+  - conference room
+  - retail space
+
+- Scope
+  - Restyle: furniture, decor, rugs, art, lighting only
+  - Renovate: also walls, floors, fixtures, cabinetry, built-ins
+
+- Style
+  Include at least:
+  - Modern Minimal
+  - Scandinavian
+  - Japandi
+  - Industrial
+  - Mid-Century
+  - Bohemian
+  - Coastal
+  - Luxury
+  - Farmhouse
+  - Cyberpunk
+
+- Designer brief fields
+  - Furniture and layout
+  - Lighting plan
+  - Paint, walls, and treatments
+  - Flooring and rugs
+  - Fixtures, cabinetry, and built-ins
+  - Must keep unchanged
+  - Budget direction
+
+- Generate button
+  - loading state
+  - disabled state until photo exists
+  - friendly error state
+
+2. Demo Generation Mode
+Until the real API provider is connected, create a polished demo generation mode:
+- It should not look broken or fake.
+- It should use the uploaded image as the “before”.
+- The “after” can be a generated demo concept card or stylized local preview, but it must feel like a credible placeholder.
+- Clearly label it as Demo Mode only when needed.
+- The user should be able to walk through the full UX without an API key.
+
+3. Before / After Experience
+Make this the most important product surface:
+- Large before/after comparison
+- Compare slider or toggle
+- Before only / after only tabs
+- Design summary beside or below it
+- Download result button
+- Regenerate button
+- Save concept button
+
+The before/after should be mobile-friendly and client-presentable.
+
+4. Saved Concepts / Project Demo
+Add a lightweight local project system using browser localStorage:
+- Save generated concepts
+- Show saved concepts in a “Project” or “Concepts” page/section
+- Each concept should include:
+  - before image
+  - after/demo image
+  - room
+  - style
+  - scope
+  - design brief summary
+  - created date
+- Allow favoriting one or more concepts
+- Allow deleting a concept
+- Add a simple “Presentation View” that hides controls and shows a clean before/after proposal.
+
+5. Professional Copy
+Rewrite UI copy so it sounds like a renovation/design tool:
+- Avoid generic AI hype
+- Avoid “magic” language
+- Use client-ready wording
+Examples:
+- “Design brief”
+- “Original room”
+- “Proposed concept”
+- “Materials and finishes”
+- “Keep unchanged”
+- “Client presentation”
+- “Save concept”
+
+6. Mobile Polish
+The app must look excellent around 390px width:
+- no text overflow
+- controls easy to tap
+- image preview prominent
+- before/after easy to show on a phone
+- presentation view should be usable in person
+
+7. Source Control
+If working inside the GitHub repo:
+- Commit changes to a new branch, e.g. `replit-studio-mvp`
+- Do not overwrite Codex/Claude work
+- Do not force push
+- Keep commits small and readable
+
+If working only in Replit:
+- Make sure the final source can be pushed/exported back to GitHub.
+- Do not leave the work only as a deployed bundle.
+
+TECH EXPECTATIONS
+If this is a Vite/React Replit app:
+- Keep dependencies minimal.
+- Use clean component structure if possible.
+- Keep state predictable.
+- Use localStorage for saved concepts.
+- No backend required for this iteration unless already present.
+
+If integrating into the Reno monorepo:
+- Web app is Next.js 15 App Router in `apps/web`.
+- Plain CSS only in `apps/web/app/globals.css`.
+- Shared prompt/provider logic belongs in `packages/core`.
+- Do not add Tailwind or UI frameworks.
+
+VERIFY
+Before finishing:
+- App loads locally
+- Main route renders
+- Upload works
+- Demo generation flow works
+- Before/after view works
+- Save concept works
+- Saved concept can be reopened
+- Mobile width around 390px looks good
+- No obvious console errors
+
+REPORT BACK
+When done, report:
+- what pages/components were added
+- what features now work
+- what is still mocked/demo-only
+- how to run it locally
+- how to push or merge it into the main Reno repo
