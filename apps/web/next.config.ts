@@ -6,7 +6,7 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: repoRoot,
-  transpilePackages: ["@openreno/core"],
+  transpilePackages: ["@reno/core"],
   experimental: {
     serverActions: {
       bodySizeLimit: "12mb"

@@ -1,5 +1,5 @@
 import { geminiProvider } from "./gemini";
-import { openaiProvider } from "./image-generation";
+import { openaiProvider } from "./openai";
 import { replicateProvider } from "./replicate";
 import type { Provider } from "../types";
 
