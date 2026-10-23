@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose something Reno should do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please read `docs/PRODUCT.md` first — it is the canonical definition of
+        what Reno is. Proposals that conflict with it need to argue the change.
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Who is this for?
+      options:
+        - Everyday user (homeowner, renter, office manager)
+        - Professional (renovator, designer, stager)
+        - Self-hoster / contributor
+        - Both main audiences
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What can't someone do today? Describe the real situation, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints this respects
+      options:
+        - label: Works without paid services (self-host / BYO key / Demo provider still fine)
+        - label: No Tailwind or UI framework needed
+        - label: Adds no required dependency on Supabase/Stripe/auth

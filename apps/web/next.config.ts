@@ -1,17 +1,15 @@
 import type { NextConfig } from "next";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
+import path from "node:path";
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: repoRoot,
-  transpilePackages: ["@openreno/core"],
+  transpilePackages: ["@reno/core"],
+  outputFileTracingRoot: path.join(__dirname, "../.."),
   experimental: {
     serverActions: {
-      bodySizeLimit: "12mb"
-    }
-  }
+      // Image data URLs are large; keep headroom for a full-size photo.
+      bodySizeLimit: "12mb",
+    },
+  },
 };
 
 export default nextConfig;

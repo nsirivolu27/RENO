@@ -2,25 +2,27 @@
   "name": "reno",
   "version": "0.1.0",
   "private": true,
-  "description": "OpenReno, an open-source AI renovation app.",
   "license": "MIT",
+  "description": "Reno — open-source AI renovation and design demo app",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "packages/core",
+    "apps/web",
+    "apps/mobile"
   ],
   "scripts": {
-    "dev": "npm run dev -w @openreno/web",
-    "mobile": "npm run start -w @openreno/mobile",
-    "build": "npm run typecheck -w @openreno/core && npm run build -w @openreno/web",
-    "typecheck": "npm run typecheck -w @openreno/core && npm run typecheck -w @openreno/web"
-  },
-  "overrides": {
-    "@types/react": "18.3.31",
-    "@types/react-dom": "18.3.7",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "dev": "npm run dev --workspace @reno/web",
+    "mobile": "npm run start --workspace @reno/mobile",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspace @reno/web",
+    "smoke:demo": "node scripts/smoke-demo.mjs",
+    "smoke:backend": "node scripts/smoke-backend.mjs",
+    "smoke:negatives": "node scripts/smoke-negatives.mjs",
+    "smoke:marketplace": "node scripts/smoke-marketplace.mjs",
+    "smoke": "npm run smoke:demo && npm run smoke:backend && npm run smoke:negatives && npm run smoke:marketplace"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "styled-jsx": "5.1.6"
   }
 }
