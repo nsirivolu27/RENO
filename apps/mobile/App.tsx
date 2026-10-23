@@ -1,4 +1,4 @@
-import { ROOMS, STYLES } from "@openreno/core";
+import { ROOMS, STYLES } from "@reno/core";
 import * as ImagePicker from "expo-image-picker";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
@@ -78,7 +78,7 @@ export default function App() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <StatusBar style="light" />
-      <Text style={styles.title}>OpenReno</Text>
+      <Text style={styles.title}>Re<Text style={styles.titleAccent}>no</Text></Text>
       <Text style={styles.subtitle}>AI room redesigns with your Gemini key or hosted web credits.</Text>
 
       <View style={styles.row}>
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#090b0f" },
   content: { padding: 20, gap: 14 },
   title: { color: "#f5f7fb", fontSize: 36, fontWeight: "900" },
+  titleAccent: { color: "#56d6a6" },
   subtitle: { color: "#9aa7bb", fontSize: 16, lineHeight: 24 },
   row: { flexDirection: "row", gap: 10 },
   button: { flex: 1, backgroundColor: "#171e29", borderRadius: 8, padding: 14, alignItems: "center" },

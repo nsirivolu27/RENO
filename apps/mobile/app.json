@@ -1,10 +1,13 @@
 {
   "expo": {
-    "name": "OpenReno",
-    "slug": "openreno",
+    "name": "reno",
+    "slug": "reno",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "assetBundlePatterns": ["**/*"]
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.reno.app"
+    }
   }
 }
