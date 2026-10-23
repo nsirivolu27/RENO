@@ -1,0 +1,47 @@
+name: Bug report
+description: Something in Reno behaves incorrectly
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      placeholder: On the Demo View, clicking "Create public share" returned a 400.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to /studio
+        2. Upload a photo, select Demo provider
+        3. Generate, save to project
+        4. Open Demo View, click Create public share
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider in use
+      options: ["Demo (no key)", "Gemini", "OpenAI", "Replicate", "Not applicable"]
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: How are you running Reno?
+      options: ["Local dev (npm run dev)", "Self-hosted build", "Other"]
+    validations:
+      required: true
+  - type: textarea
+    id: health
+    attributes:
+      label: Output of /api/health
+      description: Helps diagnose storage and share-link configuration.
+      render: json
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console or server errors
+      render: shell
