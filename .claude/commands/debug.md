@@ -1,0 +1,1 @@
+Debug the issue I describe. First reproduce it (run the app or a minimal script), then trace the failing path across packages/core and apps/web before proposing a fix. State your hypothesis, the evidence, and the smallest fix. Do not refactor unrelated code while debugging. Finish by running npm run typecheck and verifying the reproduction is fixed.
