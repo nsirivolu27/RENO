@@ -1,6 +1,6 @@
-# OpenReno
+# Reno
 
-OpenReno is an MIT-licensed AI renovation app. Upload a photo of a residential or corporate space, choose a style, and generate a photorealistic restyle or renovation with hosted credits or your own API key.
+Reno is an MIT-licensed AI renovation app. Upload a photo of a residential or corporate space, choose a style, and generate a photorealistic restyle or renovation with hosted credits or your own API key.
 
 It is built for two audiences: homeowners and teams who want fast visual exploration, and renovators or interior designers who need more precise client demos with custom design direction.
 

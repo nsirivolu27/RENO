@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping build OpenReno.
+Thanks for helping build Reno.
 
 ## Local development
 
@@ -11,7 +11,7 @@ Thanks for helping build OpenReno.
 
 ## Guidelines
 
-- Keep the BYO-key and self-host path working without paid OpenReno services.
+- Keep the BYO-key and self-host path working without paid Reno services.
 - Prefer small, focused pull requests.
 - Run `npm run typecheck` before opening a PR.
 - Do not commit API keys, generated renders, or local environment files.

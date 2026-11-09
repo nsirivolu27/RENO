@@ -2,17 +2,17 @@
   "name": "reno",
   "version": "0.1.0",
   "private": true,
-  "description": "OpenReno, an open-source AI renovation app.",
+  "description": "Reno, an open-source AI renovation app.",
   "license": "MIT",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w @openreno/web",
-    "mobile": "npm run start -w @openreno/mobile",
-    "build": "npm run typecheck -w @openreno/core && npm run build -w @openreno/web",
-    "typecheck": "npm run typecheck -w @openreno/core && npm run typecheck -w @openreno/web"
+    "dev": "npm run dev -w @reno/web",
+    "mobile": "npm run start -w @reno/mobile",
+    "build": "npm run typecheck -w @reno/core && npm run build -w @reno/web",
+    "typecheck": "npm run typecheck -w @reno/core && npm run typecheck -w @reno/web"
   },
   "overrides": {
     "@types/react": "18.3.31",

@@ -1,6 +1,6 @@
-import { buildPrompt, dataUrlParts } from "@openreno/core";
-import type { GenerateMode, GenerateRequest } from "@openreno/core";
-import { getProvider, providers } from "@openreno/core/providers";
+import { buildPrompt, dataUrlParts } from "@reno/core";
+import type { GenerateMode, GenerateRequest } from "@reno/core";
+import { getProvider, providers } from "@reno/core/providers";
 import { getCredits, spendCredit } from "../../../lib/credits";
 import { NextResponse } from "next/server";
 

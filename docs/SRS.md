@@ -1,8 +1,8 @@
-# OpenReno Software Requirements Specification
+# Reno Software Requirements Specification
 
 ## Purpose
 
-OpenReno helps users create photorealistic redesign previews for residential and corporate spaces from a single uploaded photo.
+Reno helps users create photorealistic redesign previews for residential and corporate spaces from a single uploaded photo.
 
 ## Audiences
 
@@ -18,7 +18,7 @@ OpenReno helps users create photorealistic redesign previews for residential and
 - Compare before and after with a draggable slider.
 - Download the generated result.
 - Use hosted free credits or BYO provider keys.
-- Run without Stripe, Supabase, or paid OpenReno services.
+- Run without Stripe, Supabase, or paid Reno services.
 
 ## Out of Scope for Step 1
 
@@ -44,4 +44,4 @@ OpenReno helps users create photorealistic redesign previews for residential and
 - Minimal dependencies.
 - Provider models must be easy to swap through one exported `MODEL` constant per provider file.
 - API keys supplied by users are stored only in browser localStorage and sent directly to the generation API for that request.
-- Self-host and BYO-key flows must remain functional without OpenReno paid services.
+- Self-host and BYO-key flows must remain functional without Reno paid services.
