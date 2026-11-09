@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "OpenReno",
+  title: "Reno",
   description: "Open-source AI renovation renders for every room."
 };
 

@@ -1,6 +1,6 @@
 # Architecture
 
-OpenReno starts as a modular monolith: one repository, one web API, shared core package, and clear provider boundaries.
+Reno starts as a modular monolith: one repository, one web API, shared core package, and clear provider boundaries.
 
 ## Modules
 

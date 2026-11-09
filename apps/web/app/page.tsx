@@ -4,7 +4,7 @@ const steps = ["Upload a room photo", "Choose room, style, and mode", "Generate,
 const plans = [
   { name: "Free", price: "3 renders", text: "Hosted trial credits for quick experiments." },
   { name: "Credit packs", price: "$9 per 30", text: "Pay as you go when you need more hosted renders." },
-  { name: "Self-host", price: "Free forever", text: "MIT licensed, BYO keys, and no paid OpenReno services required." }
+  { name: "Self-host", price: "Free forever", text: "MIT licensed, BYO keys, and no paid Reno services required." }
 ];
 
 export default function HomePage() {
@@ -12,8 +12,11 @@ export default function HomePage() {
     <main>
       <section className="hero">
         <nav className="nav">
-          <strong>OpenReno</strong>
-          <Link href="/studio">Studio</Link>
+          <strong className="logo">Re<span>no</span></strong>
+          <div className="navLinks">
+            <Link href="/projects">Projects</Link>
+            <Link href="/studio">Studio</Link>
+          </div>
         </nav>
         <div className="heroGrid">
           <div>
